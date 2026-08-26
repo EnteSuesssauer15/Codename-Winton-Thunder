@@ -7,6 +7,11 @@ Running this script will create a virtual environment for python and install all
 ```
 python3 dev_setup.py
 ```
+## UI Design discussion
+
+```
+https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw
+```
 
 ## Run the app
 
