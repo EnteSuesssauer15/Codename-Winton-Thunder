@@ -1,19 +1,27 @@
-# NewFolder app
+# KeepUp
+
+## Setting up a development environment
+
+Running this script will create a virtual environment for python and install all dependencies
+
+```
+python3 dev_setup.py
+```
 
 ## Run the app
 
-### uv
+### python
 
 Run as a desktop app:
 
 ```bash
-uv run flet run
+flet run
 ```
 
 Run as a web app:
 
 ```bash
-uv run flet run --web
+flet run --web
 ```
 
 For more details on running the app, refer to the [Getting Started Guide](https://flet.dev/docs/).
