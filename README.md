@@ -1,4 +1,4 @@
-![Logo](https://github.com/EnteSuesssauer15/Codename-Winton-Thunder/tree/main/src/assets/keepup-logo.svg)
+![Logo](/src/assets/keepup-logo.svg)
 
 ## Setting up a development environment
 
