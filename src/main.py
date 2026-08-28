@@ -7,14 +7,14 @@ from views.query import QueryView
 from scripts.database import DatabaseManager
 
 DB_PATH = "database.db"
-db_manager = DatabaseManager(DB_PATH)  # same path used everywhere
+db_manager = DatabaseManager(DB_PATH)
 
 
 def main(page: ft.Page):
     page.title = "App with Bottom Settings"
     page.padding = 0
 
-    # --- reusable alert dialog helper ---
+    # reusable alert dialog
     def alert_popup(title, message, actions=None):
         def default_ok(e):
             page.pop_dialog()
@@ -43,23 +43,30 @@ def main(page: ft.Page):
             actions=[ft.TextButton("Create", on_click=create_file)],
         )
 
-    # --- rest of the app setup ---
+
+
+# ------------------------------------------------------------------------------------------------------
+
+    # Main Window
     content_area = ft.Container(content=DashboardView(), expand=True)
 
-    def go_to_settings(e):
-        rail.selected_index = None
-        content_area.content = SettingsView()
-        page.update()
-
+    # simple navbar index page handler that switches the content area based on the selected index
     def on_nav_change(e):
         index = e.control.selected_index
         match index:
             case 0:
                 content_area.content = DashboardView()
             case 1:
-                content_area.content = QueryView()
+                content_area.content = QueryView(page, db_manager)
         content_area.update()
 
+    def go_to_settings(e):
+        rail.selected_index = None
+        content_area.content = SettingsView()
+        page.update()
+
+
+    # Navbar
     rail = ft.NavigationRail(
         selected_index=0,
         label_type=ft.NavigationRailLabelType.ALL,
@@ -69,6 +76,7 @@ def main(page: ft.Page):
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=0,
             controls=[
+                # navbar icon at the top
                 ft.Container(
                     content=ft.Image(
                         src="keepup-icon.svg",
@@ -79,6 +87,7 @@ def main(page: ft.Page):
                     padding=0,
                 ),
                 ft.Divider(height=1, thickness=1, color=ft.Colors.GREY_400),
+                # horizontal divider line below the icon
                 ft.Container(
                     bgcolor=ft.Colors.GREY_500,
                     height=2,
@@ -88,6 +97,7 @@ def main(page: ft.Page):
                 ),
             ],
         ),
+        # declaration of the navbar icons and names - more here https://studio.flet.dev/gallery/run/apps/icons_browser/
         destinations=[
             ft.NavigationRailDestination(
                 icon=ft.Icons.HOME_OUTLINED,
@@ -100,6 +110,7 @@ def main(page: ft.Page):
                 label="Query",
             ),
         ],
+        # trailing = Settings button at the bottom of the navbar
         trailing=ft.Container(
             content=ft.IconButton(
                 icon=ft.Icons.SETTINGS_OUTLINED,
@@ -113,6 +124,7 @@ def main(page: ft.Page):
         group_alignment=-1.0,
     )
 
+    # construct the main page layout with the navbar and content area
     page.add(
         ft.Row(
             controls=[rail, ft.VerticalDivider(width=1), content_area],

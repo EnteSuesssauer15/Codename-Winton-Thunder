@@ -12,19 +12,15 @@ class DatabaseManager:
     def exists(self):
         # Check if the database file exists
         return os.path.exists(self.db_name)
-    
-    def create_database(self):
-        # Creates the database file and establishes a connection
-        connection = sql3.connect(self.db_name)
-        cursor = connection.cursor()
-        print("Database created and Successfully Connected to SQLite")
-        print("created")
-        return connection, cursor
-    
+
     def initialize_database(self):
-        # Placeholder for creating the basic tables or schema if the database doesn't exist
         if not self.exists():
-            connection, cursor = self.create_database()
+            # Creates the database file and establishes a connection
+            connection = sql3.connect(self.db_name)
+            cursor = connection.cursor()
+            print("Database created and Successfully Connected to SQLite")
+            print("created")
+            # Placeholder for creating the basic tables or schema
             cursor.execute("""CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL,
@@ -44,3 +40,12 @@ class DatabaseManager:
         self.cursor.execute(command)
         self.connection.commit()
         print("Command executed successfully.")
+
+    def fetch_query(self, query):
+        """Run a SELECT query and return (column_names, rows)."""
+        if not self.connection:
+            self.connect()
+        self.cursor.execute(query)
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
