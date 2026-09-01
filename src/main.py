@@ -35,8 +35,14 @@ def main(page: ft.Page):
         page.pop_dialog()
         page.update()
 
-    # --- startup check: file missing? ---
-    if not db_manager.exists():
+    # --- startup check: file missing? - loading settings ---
+
+    if db_manager.exists():
+        if db_manager.settings_get("dark_mode") == "True":
+            page.theme_mode = ft.ThemeMode.DARK
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
+    else:
         alert_popup(
             "Database not found",
             f"The file '{DB_PATH}' could not be found. Would you like to create it now?",
@@ -134,4 +140,4 @@ def main(page: ft.Page):
     )
 
 
-ft.app(target=main)
+ft.run(main)
