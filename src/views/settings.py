@@ -10,10 +10,14 @@ def SettingsView():
     def handle_toggle_darkmode(e):
         # declares the page variable to access the page object
         page = e.control.page
+        # Access the keepup_icon from the page's controls
+        
         if e.control.value:
             page.theme_mode = ft.ThemeMode.DARK
+            page.keepup_icon.src = "white-keepup-icon.svg"
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
+            page.keepup_icon.src = "black-keepup-icon.svg"
         page.update()
 
 
@@ -24,7 +28,6 @@ def SettingsView():
     return ft.Container(
         content=ft.Column([
             ft.Text("Settings Page", size=28, weight=ft.FontWeight.BOLD),
-            ft.Switch(label="Dark Mode", value=db_manager.settings_get("dark_mode") == "True", on_change=handle_toggle_darkmode),
             ft.Button("Save Settings", on_click=handle_save_settings),
         ]),
         padding=20,
