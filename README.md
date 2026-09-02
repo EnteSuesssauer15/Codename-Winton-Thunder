@@ -1,4 +1,4 @@
-![Logo](/src/assets/keepup-logo.svg)
+![Logo](src/assets/white-keepup-logo.svg)
 
 ## Setting up a development environment
 
