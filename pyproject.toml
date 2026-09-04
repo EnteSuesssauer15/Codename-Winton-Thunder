@@ -8,7 +8,10 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-    "flet>=0.86.5"
+    "flet>=0.86.5",
+    "flet[test]>=0.86.5",
+    "flet-datatable2>=0.86.5",
+    "pysqlite3>=0.6.0",
 ]
 
 [dependency-groups]
@@ -18,7 +21,6 @@ dev = [
     "flet-web>=0.86.5",
     # Integration testing with `flet test` / pytest. The `test` extra brings in
     # pytest, pytest-asyncio and the screenshot-comparison dependencies.
-    "flet[test]>=0.86.5",
 ]
 
 [tool.pytest.ini_options]
