@@ -11,8 +11,19 @@ db_manager = DatabaseManager(DB_PATH)
 
 
 def main(page: ft.Page):
-    page.title = "App with Bottom Settings"
+    page.title = "KeepUp"
     page.padding = 0
+
+    # defining variable to change icon based on dark/light mode
+    keepup_icon = ft.Image(
+        src="black-keepup-icon.svg",
+        width=70,
+        height=70,
+        fit=ft.BoxFit.CONTAIN,
+    )
+
+    # Store the icon in the page object for later access
+    page.keepup_icon = keepup_icon 
 
     # reusable alert dialog
     def alert_popup(title, message, actions=None):
@@ -37,12 +48,13 @@ def main(page: ft.Page):
 
     # --- startup check: file missing? - loading settings ---
 
-    if db_manager.exists():
-        if db_manager.settings_get("dark_mode") == "True":
-            page.theme_mode = ft.ThemeMode.DARK
+    if page.theme_mode == ft.ThemeMode.SYSTEM:
+        if page.platform_brightness == ft.Brightness.DARK:
+            page.keepup_icon.src = "white-keepup-icon.svg"
         else:
-            page.theme_mode = ft.ThemeMode.LIGHT
-    else:
+            page.keepup_icon.src = "black-keepup-icon.svg"
+
+    if not db_manager.exists():
         alert_popup(
             "Database not found",
             f"The file '{DB_PATH}' could not be found. Would you like to create it now?",
@@ -54,14 +66,14 @@ def main(page: ft.Page):
 # ------------------------------------------------------------------------------------------------------
 
     # Main Window
-    content_area = ft.Container(content=DashboardView(), expand=True)
+    content_area = ft.Container(content=DashboardView(page, db_manager), expand=True)
 
     # simple navbar index page handler that switches the content area based on the selected index
     def on_nav_change(e):
         index = e.control.selected_index
         match index:
             case 0:
-                content_area.content = DashboardView()
+                content_area.content = DashboardView(page, db_manager)
             case 1:
                 content_area.content = QueryView(page, db_manager)
         content_area.update()
@@ -71,6 +83,7 @@ def main(page: ft.Page):
         content_area.content = SettingsView()
         page.update()
 
+ 
 
     # Navbar
     rail = ft.NavigationRail(
@@ -84,13 +97,7 @@ def main(page: ft.Page):
             controls=[
                 # navbar icon at the top
                 ft.Container(
-                    content=ft.Image(
-                        src="keepup-icon.svg",
-                        width=70,
-                        height=70,
-                        fit=ft.BoxFit.CONTAIN,
-                    ),
-                    padding=0,
+                    content=keepup_icon,
                 ),
                 ft.Divider(height=1, thickness=1, color=ft.Colors.GREY_400),
                 # horizontal divider line below the icon

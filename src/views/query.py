@@ -44,7 +44,7 @@ def QueryView(page: ft.Page, db_manager):
     return ft.Container(
         content=ft.Column(
             controls=[
-                ft.Row(controls=[query_field, ft.ElevatedButton("Run", on_click=run_query)]),
+                ft.Row(controls=[query_field, ft.Button("Run", on_click=run_query)]),
                 status_text,
                 ft.Container(content=table, expand=True),
             ],
