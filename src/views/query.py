@@ -19,7 +19,7 @@ def QueryView(page: ft.Page, db_manager):
             return
 
         try:
-            columns, rows = db_manager.fetch_query(query)
+            columns, rows = db_manager.search(query)
         except Exception as ex:
             status_text.value = f"Error: {ex}"
             table.columns = [ft_dt.DataColumn2(label=ft.Text(""))]

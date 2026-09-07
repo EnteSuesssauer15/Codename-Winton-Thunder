@@ -71,3 +71,14 @@ class DatabaseManager:
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows
+
+    def search(self, query):
+        """Run a SELECT query and return (column_names, rows)."""
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+        self.cursor.execute("""SELECT title, description FROM updates WHERE title || description LIKE '%{}%'""".format(query))
+        print(query)
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows

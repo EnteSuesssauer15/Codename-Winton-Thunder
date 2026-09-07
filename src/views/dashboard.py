@@ -61,6 +61,9 @@ def DashboardView(page: ft.Page, db_manager):
             None,
             0,  # SW_HIDE
         )
+        refresh_table()
+        page.update()
+        
         # updater.py writes results to the DB in a separate elevated process,
         # so this call returns immediately — the table won't reflect new
         # rows until you refresh (see note below).
@@ -85,7 +88,7 @@ def DashboardView(page: ft.Page, db_manager):
                 ft.Row(
                     [
                         ft.Button("Search for updates", on_click=search_for_updates),
-                        ft.Button("Refresh list", on_click=refresh_table),
+                        #ft.Button("Refresh list", on_click=refresh_table),
                         ft.Button("Install selected", on_click=handle_install_selected),
                     ]
                 ),
