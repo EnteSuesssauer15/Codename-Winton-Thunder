@@ -55,10 +55,13 @@ def main(page: ft.Page):
             page.keepup_icon.src = "black-keepup-icon.svg"
 
     if not db_manager.exists():
-        alert_popup(
-            "Database not found",
-            f"The file '{DB_PATH}' could not be found. Would you like to create it now?",
-            actions=[ft.TextButton("Create", on_click=create_file)],
+        (
+        #alert_popup(
+        #    "Database not found",
+        #    f"The file '{DB_PATH}' could not be found. Would you like to create it now?",
+        #    actions=[ft.TextButton("Create", on_click=create_file)],
+        # Removing the alert popup and directly creating the database
+        db_manager.initialize_database()
         )
 
 
