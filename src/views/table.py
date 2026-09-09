@@ -7,6 +7,8 @@ def TableView(page: ft.Page, db_manager):
     selected_titles = set()
     loading_ring = ft.ProgressRing(value=None, visible=False)
 
+
+    # --- Building / Searching to create and display in the table ---
     def build_rows(search_query=None):
         if search_query:
             columns, records = db_manager.search(search_query)
@@ -42,12 +44,15 @@ def TableView(page: ft.Page, db_manager):
 
 
     def run_query(e):
+        loading_ring.visible = True
+        page.update()
         query = query_field.value
         try:
             table.rows = build_rows(query if query else None)
         except Exception as ex:
             table.rows = []
         table.update()
+        loading_ring.visible = False
         page.update()
         
     def delete_selected():
@@ -72,7 +77,9 @@ def TableView(page: ft.Page, db_manager):
         else:
             selected_titles.clear()
         refresh_table()
+    # --- Building / Searching to create and display in the table ---
 
+    # adds a delete button
     delete_button = ft.Button(
         "delete selected",
         icon=ft.CupertinoIcons.TRASH,
@@ -95,6 +102,9 @@ def TableView(page: ft.Page, db_manager):
         rows=build_rows(),
         on_select_all=handle_select_all,
     )
+
+
+    # --- Popup Window for adding new device ---
 
     device_field = ft.TextField(label="Device")
     type_field = ft.TextField(label="Type")
@@ -149,12 +159,6 @@ def TableView(page: ft.Page, db_manager):
         actions_alignment=ft.MainAxisAlignment.END,
     )
 
-    query_field = ft.TextField(
-        label="Enter your SQL query",
-        on_submit=run_query,
-        expand=True,
-    )
-
     def open_add_dialog(e):
         device_field.value = ""
         type_field.value = ""
@@ -165,6 +169,17 @@ def TableView(page: ft.Page, db_manager):
         icon=ft.Icons.ADD,
         on_click=open_add_dialog,
     )
+
+    # --- Popup Window for adding new device ---
+
+    # Searchbar
+    query_field = ft.TextField(
+        label="Enter your Search Term",
+        on_submit=run_query,
+        expand=True,
+    )
+
+    # assembling the page
     container = ft.Container(
         content=ft.Column(
             controls=[

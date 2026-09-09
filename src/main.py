@@ -1,9 +1,7 @@
 # main.py
 import flet as ft
-import os
 from views.dashboard import DashboardView
 from views.settings import SettingsView
-#from views.query import QueryView
 from views.table import TableView
 from scripts.database import DatabaseManager
 
@@ -29,7 +27,7 @@ def main(page: ft.Page):
     # Store the icon in the page object for later access
     page.keepup_icon = keepup_icon 
 
-    # reusable alert dialog
+    # reusable alert dialog -- never used now
     def alert_popup(title, message, actions=None):
         def default_ok(e):
             page.pop_dialog()
