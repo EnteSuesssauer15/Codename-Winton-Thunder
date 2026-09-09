@@ -23,11 +23,57 @@ def find_updates():
 
         for i in range(search_result.Updates.Count):
             update = search_result.Updates.Item(i)
+            if DatabaseManager.check(update.Title):  # Skip if the update is already in the database
+                continue
             DatabaseManager.update_set(update.Title, update.Description)
     except Exception as e:
         print(f"Error finding updates: {e}")
     finally:
         pythoncom.CoUninitialize()
+
+import subprocess
+
+def find_winget_updates(db_manager):
+    """
+    Finds available winget package updates and stores new ones in the database.
+    """
+    try:
+        result = subprocess.run(
+            ["winget", "upgrade", "--accept-source-agreements"],
+            capture_output=True,
+            text=True,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+
+        lines = result.stdout.splitlines()
+        start_index = None
+        for i, line in enumerate(lines):
+            if line.strip().startswith("Name") and "Id" in line:
+                start_index = i + 2  # skip header + separator line
+                break
+
+        if start_index is None:
+            print("No winget updates found or unexpected output format.")
+            return
+
+        for line in lines[start_index:]:
+            if not line.strip() or line.startswith("-"):
+                continue
+            parts = line.split()
+            if len(parts) < 4:
+                continue
+
+            name = parts[0]
+            available_version = parts[-2]  # second-to-last column is usually "Available"
+
+            if db_manager.check(name):  # Skip if the update is already in the database
+                continue
+            db_manager.update_set(name, available_version)
+
+    except Exception as e:
+        print(f"Error finding winget updates: {e}")
+    finally:
+        print("Winget update check complete.")
 
 
 def install_update_by_title(update_title):
@@ -83,13 +129,10 @@ def install_update_by_title(update_title):
 
 
 if __name__ == "__main__":
-    if not pyuac.isUserAdmin():
-        print("Re-launching with admin privileges...")
-        pyuac.runAsAdmin()
-    else: 
-        updates = find_updates()
-
-        if not updates:
-            print("No updates available.")
-        else:
-            print("\nAvailable Updates:")
+    import ctypes
+    print("Is admin:", ctypes.windll.shell32.IsUserAnAdmin())
+    updates = find_winget_updates()
+    if not updates:
+        print("No updates available.")
+    else:
+        print("\nAvailable Updates:")
