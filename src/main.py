@@ -3,7 +3,7 @@ import flet as ft
 import os
 from views.dashboard import DashboardView
 from views.settings import SettingsView
-from views.query import QueryView
+#from views.query import QueryView
 from views.table import TableView
 from scripts.database import DatabaseManager
 
@@ -11,9 +11,12 @@ DB_PATH = "database.db"
 db_manager = DatabaseManager(DB_PATH)
 
 
+
 def main(page: ft.Page):
     page.title = "KeepUp"
     page.padding = 0
+
+    table_container, refresh_table_view = TableView(page, db_manager)
 
     # defining variable to change icon based on dark/light mode
     keepup_icon = ft.Image(
@@ -61,6 +64,7 @@ def main(page: ft.Page):
         #    "Database not found",
         #    f"The file '{DB_PATH}' could not be found. Would you like to create it now?",
         #    actions=[ft.TextButton("Create", on_click=create_file)],
+        
         # Removing the alert popup and directly creating the database
         db_manager.initialize_database()
         )
@@ -78,15 +82,23 @@ def main(page: ft.Page):
         match index:
             case 0:
                 content_area.content = DashboardView(page, db_manager)
+                page.floating_action_button.visible = True
             case 1:
-                content_area.content = TableView(page, db_manager)
-            case 2:
-                content_area.content = QueryView(page, db_manager)
-        content_area.update()
+
+                page.floating_action_button.visible = True
+                content_area.content = table_container
+                content_area.update()  # attach it to the page tree FIRST
+                refresh_table_view()
+            #case 2:
+                #content_area.content = QueryView(page, db_manager)
+            #    page.floating_action_button.visible = True
+
+        page.update()
 
     def go_to_settings(e):
         rail.selected_index = None
         content_area.content = SettingsView()
+        page.floating_action_button.visible = False
         page.update()
 
  
@@ -128,11 +140,11 @@ def main(page: ft.Page):
                 selected_icon=ft.CupertinoIcons.TABLE_FILL,
                 label="Table",
             ),
-            ft.NavigationRailDestination(
-                icon=ft.Icons.SEARCH_OUTLINED,
-                selected_icon=ft.Icons.SEARCH,
-                label="Query",
-            ),
+            #ft.NavigationRailDestination(
+            #    icon=ft.Icons.SEARCH_OUTLINED,
+            #    selected_icon=ft.Icons.SEARCH,
+            #    label="Query",
+            #),
         ],
         # trailing = Settings button at the bottom of the navbar
         trailing=ft.Container(
