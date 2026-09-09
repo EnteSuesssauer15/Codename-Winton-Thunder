@@ -4,6 +4,7 @@ import os
 from views.dashboard import DashboardView
 from views.settings import SettingsView
 from views.query import QueryView
+from views.table import TableView
 from scripts.database import DatabaseManager
 
 DB_PATH = "database.db"
@@ -78,6 +79,8 @@ def main(page: ft.Page):
             case 0:
                 content_area.content = DashboardView(page, db_manager)
             case 1:
+                content_area.content = TableView(page, db_manager)
+            case 2:
                 content_area.content = QueryView(page, db_manager)
         content_area.update()
 
@@ -119,6 +122,11 @@ def main(page: ft.Page):
                 icon=ft.Icons.HOME_OUTLINED,
                 selected_icon=ft.Icons.HOME,
                 label="Home",
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.CupertinoIcons.TABLE,
+                selected_icon=ft.CupertinoIcons.TABLE_FILL,
+                label="Table",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.SEARCH_OUTLINED,

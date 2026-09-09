@@ -23,10 +23,11 @@ class DatabaseManager:
             cursor = connection.cursor()
             print("Database created and Successfully Connected to SQLite")
             # Placeholder for creating the basic tables or schema
-            cursor.execute("""CREATE TABLE IF NOT EXISTS updates (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                description TEXT NOT NULL
+            cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Device TEXT NOT NULL,
+                Type TEXT NOT NULL,
+                Location TEXT NOT NULL
             );""")
             connection.commit()
             cursor.execute("""CREATE TABLE IF NOT EXISTS settings (
@@ -68,10 +69,13 @@ class DatabaseManager:
 
 
     # stores the found updates with its title and description in the database updates table
-    def update_set(self, title, description):
-        """Set an update in the updates table."""
-        self.execute("INSERT OR REPLACE INTO updates (title, description) VALUES ('{}', '{}')".format(title, description))
+    def device_create(self, device, type, location):
+        """Set a device in the inventory table."""
+        self.execute("INSERT OR REPLACE INTO inventory (device, type, location) VALUES ('{}', '{}', '{}')".format(device, type, location))
 
+    def device_delete(self, id):
+        """Delete a device from the inventory table."""
+        self.execute("DELETE FROM inventory WHERE ID = {}".format(id))
 
     # used to build tables which returns the column names and rows of the database updates table
     def fetch_query(self, query):
@@ -91,8 +95,7 @@ class DatabaseManager:
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        self.cursor.execute("""SELECT title, description FROM updates WHERE title || description LIKE '%{}%'""".format(query))
-        print(query)
+        self.cursor.execute("""SELECT id, device, type, location FROM inventory WHERE id || device || type || location LIKE '%{}%'""".format(query))
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows
@@ -104,7 +107,7 @@ class DatabaseManager:
         connection = sql3.connect(self.db_name)
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT 1 FROM updates WHERE title = ? LIMIT 1",
+            "SELECT 1 FROM inventory WHERE device = ? LIMIT 1",
             (title,)
         )
         row = cursor.fetchone()
