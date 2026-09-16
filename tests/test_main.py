@@ -2,21 +2,23 @@ import flet.testing as ftt
 
 
 async def test_increment(flet_app: ftt.FletTestApp):
-    """Counter sample: tap the FAB and assert the counter goes 0 -> 1.
+    """Prueft den mit Flet gelieferten Beispieltest.
 
-    The `flet_app` fixture is provided automatically by the flet pytest plugin.
-    Run with `flet test` (or `uv run pytest`) from the project directory.
+    `flet_app` wird vom Flet-Pytest-Plugin bereitgestellt. Der Test ist aktuell
+    noch ein Platzhalter aus dem Flet-Projektgeruest und prueft noch keinen
+    KeepUp-Inventarworkflow.
     """
     tester = flet_app.tester
 
     await tester.pump_and_settle()
 
-    # Initial state
+    # Warten, bis die erste Darstellung der App abgeschlossen ist.
+    # Ausgangszustand des Beispielzaehlers.
     assert (await tester.find_by_text("0")).count == 1
 
-    # Tap the increment button (found by its key) and let the UI settle
+    # Den Plus-Button ueber seinen Key anklicken und die UI aktualisieren.
     await tester.tap(await tester.find_by_key("increment"))
     await tester.pump_and_settle()
 
-    # New state
+    # Danach soll der Zaehler den Wert 1 anzeigen.
     assert (await tester.find_by_text("1")).count == 1
