@@ -155,7 +155,7 @@ class DatabaseManager:
         rows = self.cursor.fetchall()
         return column_names, rows
 
-    def get_next_highest_id(self, prefix="CMP"):       
+    def get_next_highest_id(self, prefix):       
         # Nächste nummer für die InventarNr
         self.cursor.execute(
             "SELECT MAX(InventarNr) FROM inventory WHERE InventarNr LIKE ?", 

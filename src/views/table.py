@@ -121,7 +121,7 @@ def TableView(page: ft.Page, db_manager):
 
 
     # --- Dialog zum Anlegen eines neuen Geraets ---
-    
+
     device_field = ft.TextField(label="Device Name")
 
     # mehrere daten benötigen "_," um diese zu entpacken
@@ -153,7 +153,7 @@ def TableView(page: ft.Page, db_manager):
         location = location_field.value.strip()
 
         # erstellt die InventarNr dynamisch mit den ausgewählten einträgen
-        device_id = type_field.value + db_manager.get_next_highest_id()
+        device_id = type_field.value + db_manager.get_next_highest_id(type_field.value)
 
         if not device:
             # `error_text` zeigt die Fehlermeldung direkt unter dem Feld an.
