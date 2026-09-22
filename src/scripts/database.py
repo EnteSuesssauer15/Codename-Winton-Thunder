@@ -29,23 +29,22 @@ class DatabaseManager:
             cursor = connection.cursor()
             print("Database created and Successfully Connected to SQLite")
 
+            # eigene datenbank für auswählbare optionen im menü
+            # legt den wert für die inventarnummer fest
+            cursor.execute("""CREATE TABLE IF NOT EXISTS devicetypes (
+                Device TEXT PRIMARY KEY,
+                Key TEXT NOT NULL
+            );""")
+            connection.commit()
+
             # `inventory` speichert jedes Geraet. ID wird automatisch vergeben;
             # die drei Textfelder duerfen nicht leer sein (NOT NULL).
             cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
                 InventarNr TEXT PRIMARY KEY,
                 Device TEXT NOT NULL,
                 Type TEXT NOT NULL,
-                Location TEXT NOT NULL
-            );""")
-            connection.commit()
-
-
-            # eigene datenbank für auswählbare optionen im menü
-            # legt den wert für die inventarnummer fest
-            cursor.execute("""CREATE TABLE IF NOT EXISTS devicetypes (
-                ID TEXT PRIMARY KEY,
-                Device TEXT NOT NULL,
-                Key TEXT NOT NULL
+                Location TEXT NOT NULL,
+                FOREIGN KEY (Type) REFERENCES devicetypes(Device)
             );""")
             connection.commit()
 
@@ -109,7 +108,8 @@ class DatabaseManager:
         """Set a device in the inventory table."""
         # Die Werte kommen aus dem Formular in table.py und werden als neuer
         # Datensatz in `inventory` gespeichert.
-        self.execute("INSERT OR REPLACE INTO inventory (InventarNr, Device, Type, Location) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
+        self.execute("PRAGMA foreign_keys = ON;")
+        self.execute("INSERT INTO inventory (InventarNr, Device, Type, Location) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
 
     def device_delete(self, id):
         """Delete a device from the inventory table."""

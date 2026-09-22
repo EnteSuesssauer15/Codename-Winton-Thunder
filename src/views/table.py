@@ -128,16 +128,15 @@ def TableView(page: ft.Page, db_manager):
     _, rows = db_manager.types()
     # Fügt die optionen pro datenbankeintrag hinzu
     dynamic_options = [
-        ft.dropdown.Option(key=str(row[1]), text=str(row[0])) for row in rows
+        ft.dropdown.Option(key=str(row[0]), text=str(row[0])) for row in rows
     ]
 
     # Dynamisches Dropdownmenü aus Datenbankeinträgen für Feste Gerätetypen
-
     type_field = ft.Dropdown(
         width=300,
-        options=dynamic_options
+        options=dynamic_options,
     )
-    
+
     location_field = ft.TextField(label="Location")
 
     def close_dialog(e):
