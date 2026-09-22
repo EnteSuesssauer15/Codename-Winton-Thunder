@@ -138,7 +138,7 @@ class DatabaseManager:
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        self.cursor.execute("""SELECT id, device, type, location FROM inventory WHERE id || device || type || location LIKE '%{}%'""".format(query))
+        self.cursor.execute("""SELECT InventarNr, Device, Type, Location FROM inventory WHERE InventarNr || Device || Type || Location LIKE '%{}%'""".format(query))
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows
