@@ -32,11 +32,28 @@ class DatabaseManager:
             # `inventory` speichert jedes Geraet. ID wird automatisch vergeben;
             # die drei Textfelder duerfen nicht leer sein (NOT NULL).
             cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                InventarNr TEXT PRIMARY KEY,
                 Device TEXT NOT NULL,
                 Type TEXT NOT NULL,
                 Location TEXT NOT NULL
             );""")
+            connection.commit()
+
+
+            # eigene datenbank für auswählbare optionen im menü
+            # legt den wert für die inventarnummer fest
+            cursor.execute("""CREATE TABLE IF NOT EXISTS devicetypes (
+                ID TEXT PRIMARY KEY,
+                Device TEXT NOT NULL,
+                Key TEXT NOT NULL
+            );""")
+            connection.commit()
+
+            cursor.execute("""INSERT INTO devicetypes (Device, Key) VALUES 
+                ('Monitor', 'MON'),
+                ('Computer', 'CMP'),
+                ('Päripherie', 'DV'),
+                ('Lizenz', 'LZ');""")
             connection.commit()
 
             # In `settings` koennen spaeter Optionen wie der Dark Mode liegen.
@@ -88,16 +105,16 @@ class DatabaseManager:
 
 
     # stores the found updates with its title and description in the database updates table
-    def device_create(self, device, type, location):
+    def device_create(self, id, device, type, location):
         """Set a device in the inventory table."""
         # Die Werte kommen aus dem Formular in table.py und werden als neuer
         # Datensatz in `inventory` gespeichert.
-        self.execute("INSERT OR REPLACE INTO inventory (device, type, location) VALUES ('{}', '{}', '{}')".format(device, type, location))
+        self.execute("INSERT OR REPLACE INTO inventory (InventarNr, Device, Type, Location) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
 
     def device_delete(self, id):
         """Delete a device from the inventory table."""
         # Geloescht wird ueber die eindeutige ID, nicht ueber den Geraetenamen.
-        self.execute("DELETE FROM inventory WHERE ID = {}".format(id))
+        self.execute("DELETE FROM inventory WHERE InventarNr = '{}'".format(id))
 
     # used to build tables which returns the column names and rows of the database updates table
     def fetch_query(self, query):
@@ -126,19 +143,38 @@ class DatabaseManager:
         rows = self.cursor.fetchall()
         return column_names, rows
 
+    def types(self):
+        """Run a SELECT query and return (column_names, rows)."""
+        # Die Suche verbindet ID, Geraet, Typ und Ort zu einem Suchbereich.
+        # Dadurch findet ein Begriff Treffer in jeder sichtbaren Spalte.
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+        self.cursor.execute("""SELECT Device, Key FROM devicetypes """)
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
 
-    # acts as check to prevent double entries when checking for updates
-    def check(self, title):
-        """Return True if an update with this title is already in the database."""
-        # `check` beantwortet nur die Frage, ob ein Geraet bereits existiert.
-        # Die Methode wird derzeit von keiner View verwendet.
-        connection = sql3.connect(self.db_name)
-        cursor = connection.cursor()
-        cursor.execute(
-            "SELECT 1 FROM inventory WHERE device = ? LIMIT 1",
-            (title,)
+    def get_next_highest_id(self, prefix="CMP"):       
+        # Nächste nummer für die InventarNr
+        self.cursor.execute(
+            "SELECT MAX(InventarNr) FROM inventory WHERE InventarNr LIKE ?", 
+            (f"{prefix}%",)
         )
-        row = cursor.fetchone()
-        connection.close()
-        print(row)
-        return row is not None
+        result = self.cursor.fetchone()
+        
+        # If no items exist with this prefix yet, start at 1
+        if result is None or result[0] is None:
+            next_number = 1
+        else:
+            # result[0] is e.g., "CMP00042"
+            highest_string = result[0]
+            
+            # 2. Cut out just the last 5 digits using string slicing [-5:]
+            numeric_part = highest_string[-5:]  # Results in "00042"
+            
+            # 3. Convert to integer and add 1
+            next_number = int(numeric_part) + 1
+            
+        # 4. Return the prefix combined with the newly padded 5-digit number
+        return f"{next_number:05d}"
