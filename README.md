@@ -184,7 +184,7 @@ Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/)
 
 ## ER Diagramm
 
-[Excalidraw]([https://excalidraw.com/#json=w0v6rL-OIabWv51c_f-qR,hcD6W9Hhm919ZOPSSmCUAg](https://excalidraw.com/#json=DnFHi2AWA6FnGXiiEVL2p,ao85zTtm19U3zLYcwQSQGQ))
+[Excalidraw](https://excalidraw.com/#json=DnFHi2AWA6FnGXiiEVL2p,ao85zTtm19U3zLYcwQSQGQ)
 
 ## Programm Ablauf
 
