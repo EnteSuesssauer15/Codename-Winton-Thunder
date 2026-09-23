@@ -176,7 +176,7 @@ Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/)
 
 ## Anforderungen
 
-[Excalidraw](https://excalidraw.com/#json=XEy9W-YD03nUIpjvDkBY7,yv5Lv6JnRmQZxdDQ-oAcMw)
+[Excalidraw](https://excalidraw.com/#room=8af59903bd29f5051c35,2fg6w04Sic9SkeJsk8R1cA)
 
 ## UI-Entwurf
 
@@ -184,8 +184,8 @@ Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/)
 
 ## ER Diagramm
 
-[Excalidraw](https://excalidraw.com/#json=DnFHi2AWA6FnGXiiEVL2p,ao85zTtm19U3zLYcwQSQGQ)
+[Excalidraw](https://excalidraw.com/#room=0e5fddbb5bf03e019d6b,Rz1cnnvJuAKWnrCQ02-RFA)
 
 ## Programm Ablauf
 
-[Excalidraw](https://excalidraw.com/#json=FJyzCcZHyuCK4zTrdpnlJ,PhK3vY6ElGv_O3ld0joidg)
+[Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)
