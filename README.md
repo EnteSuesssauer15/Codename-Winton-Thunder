@@ -96,9 +96,10 @@ enthält die Inventardaten und liegt im Hauptordner.
 │   ├── scripts/
 │   │   └── database.py    Zugriff auf die SQLite-Datenbank
 │   ├── views/
-│   │   ├── dashboard.py   Dashboard-Seite
+│   │   ├── devices.py     Geräte-Seite
+|   |   ├── types.py       Gerätetypen-Seite
+|   |   ├── locations.py   Orte-Seite
 │   │   ├── settings.py    Einstellungsseite
-│   │   └── table.py       Inventartabelle, Suche und Löschen
 │   └── assets/            Bilder und Logos
 └── tests/                 Automatisierte Tests
 ```
