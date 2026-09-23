@@ -174,11 +174,18 @@ flet build web -v      # Web
 
 Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/).
 
+## Anforderungen
+
+[Excalidraw](https://excalidraw.com/#json=XEy9W-YD03nUIpjvDkBY7,yv5Lv6JnRmQZxdDQ-oAcMw)
+
 ## UI-Entwurf
 
-Der aktuelle UI-Entwurf ist in [Excalidraw](https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw)
-zu finden.
+[Excalidraw](https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw)
 
-## ER DIAGRAMM??!?
+## ER Diagramm
 
-[Excalidraw](https://excalidraw.com/#json=w0v6rL-OIabWv51c_f-qR,hcD6W9Hhm919ZOPSSmCUAg)
+[Excalidraw]([https://excalidraw.com/#json=w0v6rL-OIabWv51c_f-qR,hcD6W9Hhm919ZOPSSmCUAg](https://excalidraw.com/#json=DnFHi2AWA6FnGXiiEVL2p,ao85zTtm19U3zLYcwQSQGQ))
+
+## Programm Ablauf
+
+[Excalidraw](https://excalidraw.com/#json=FJyzCcZHyuCK4zTrdpnlJ,PhK3vY6ElGv_O3ld0joidg)
