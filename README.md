@@ -96,9 +96,10 @@ enthält die Inventardaten und liegt im Hauptordner.
 │   ├── scripts/
 │   │   └── database.py    Zugriff auf die SQLite-Datenbank
 │   ├── views/
-│   │   ├── dashboard.py   Dashboard-Seite
+│   │   ├── devices.py     Geräte-Seite
+|   |   ├── types.py       Gerätetypen-Seite
+|   |   ├── locations.py   Orte-Seite
 │   │   ├── settings.py    Einstellungsseite
-│   │   └── table.py       Inventartabelle, Suche und Löschen
 │   └── assets/            Bilder und Logos
 └── tests/                 Automatisierte Tests
 ```
@@ -174,11 +175,18 @@ flet build web -v      # Web
 
 Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/).
 
+## Anforderungen
+
+[Excalidraw](https://excalidraw.com/#room=8af59903bd29f5051c35,2fg6w04Sic9SkeJsk8R1cA)
+
 ## UI-Entwurf
 
-Der aktuelle UI-Entwurf ist in [Excalidraw](https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw)
-zu finden.
+[Excalidraw](https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw)
 
-## ER DIAGRAMM??!?
+## ER Diagramm
 
-[Excalidraw](https://excalidraw.com/#json=w0v6rL-OIabWv51c_f-qR,hcD6W9Hhm919ZOPSSmCUAg)
+[Excalidraw](https://excalidraw.com/#room=0e5fddbb5bf03e019d6b,Rz1cnnvJuAKWnrCQ02-RFA)
+
+## Programm Ablauf
+
+[Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)
