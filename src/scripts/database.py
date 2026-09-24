@@ -3,83 +3,77 @@ import pysqlite3 as sql3
 
 
 class DatabaseManager:
-    """Kleine Hilfsklasse fuer alle Zugriffe auf die lokale SQLite-Datenbank."""
-
     def __init__(self, db_name="database.db"):
-        # Der Dateiname wird von main.py uebergeben. Verbindung und Cursor
-        # werden erst geoeffnet, wenn eine Abfrage wirklich gebraucht wird.
+
         self.db_name = db_name
         self.connection = None
         self.cursor = None
 
-    # startup check wether database exists or not, returns True if exists, False if not
     def exists(self):
-        # Eine SQLite-Datenbank ist in diesem Projekt einfach eine Datei.
-        # Diese Pruefung sagt noch nichts darueber aus, ob die Tabellen korrekt
-        # sind; sie prueft nur, ob die Datei vorhanden ist.
+        # Prüfen ob eine "database.db" Datei vorhanden ist
         return os.path.exists(self.db_name)
 
 
-    # startup method to create a missing database and the required tables inside 
+    # Funktion um die Datenbank zu generieren und einzurichten
     def initialize_database(self):
-        if not self.exists():
-            # `connect` erstellt die Datei, falls sie noch nicht existiert.
-            # Ueber die Verbindung werden danach SQL-Befehle ausgefuehrt.
-            connection = sql3.connect(self.db_name)
-            cursor = connection.cursor()
-            print("Database created and Successfully Connected to SQLite")
+        try:
+            if not self.exists():
+                connection = sql3.connect(self.db_name)
+                cursor = connection.cursor()
+                print("Database created and Successfully Connected to SQLite")
 
-            # eigene datenbank für auswählbare optionen im menü
-            # legt den wert für die inventarnummer fest
-            cursor.execute("""CREATE TABLE IF NOT EXISTS devicetypes (
-                Device TEXT PRIMARY KEY,
-                Key TEXT NOT NULL
-            );""")
-            connection.commit()
+                cursor.execute("""CREATE TABLE IF NOT EXISTS employees (
+                    employeeId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TXT NOT NULL,
+                    Surname TXT NOT NULL,
+                    Department TXT NOT NULL
+                );""")
+                connection.commit()
 
-            # `inventory` speichert jedes Geraet. ID wird automatisch vergeben;
-            # die drei Textfelder duerfen nicht leer sein (NOT NULL).
-            cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
-                InventarNr TEXT PRIMARY KEY,
-                Device TEXT NOT NULL,
-                Type TEXT NOT NULL,
-                Location TEXT NOT NULL,
-                FOREIGN KEY (Type) REFERENCES devicetypes(Device)
-            );""")
-            connection.commit()
+                cursor.execute("""CREATE TABLE IF NOT EXISTS devicetypes (
+                    TypeId TXT PRIMARY KEY,
+                    Short TXT NOT NULL
+                );""")
+                connection.commit()
 
-            cursor.execute("""INSERT INTO devicetypes (Device, Key) VALUES 
-                ('Monitor', 'MON'),
-                ('Computer', 'CMP'),
-                ('Päripherie', 'DV'),
-                ('Lizenz', 'LZ');""")
-            connection.commit()
+                # ! Entfernen
+                cursor.execute("""INSERT INTO devicetypes (TypeId, Short) VALUES 
+                    ('Monitor', 'MON'),
+                    ('Computer', 'CMP'),
+                    ('Päripherie', 'DV'),
+                    ('Lizenz', 'LZ');""")
+                connection.commit()
 
-            # In `settings` koennen spaeter Optionen wie der Dark Mode liegen.
-            # `option` ist der Schluessel und darf daher nur einmal vorkommen.
-            cursor.execute("""CREATE TABLE IF NOT EXISTS settings (
-                option TEXT PRIMARY KEY,
-                value TEXT
-            );""")
-            connection.commit()
-            connection.close()
-            print("Database initialized and updates table created.")
-        else:
-            # Die vorhandene Datei wird nicht ueberschrieben. So bleiben die
-            # bereits gespeicherten Geraete beim Neustart erhalten.
-            print("Database already exists.")
+                cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
+                    InventarNr TEXT PRIMARY KEY,
+                    Device TEXT NOT NULL,
+                    Type_Id TEXT NOT NULL,
+                    Assignee_Id INTEGER NOT NULL,
+                    FOREIGN KEY (Type_Id) REFERENCES devicetypes(TypeId),
+                    FOREIGN KEY (Assignee_Id) REFERENCES employees(employeeId)
+                );""")
+                connection.commit()
+
+                cursor.execute("""CREATE TABLE IF NOT EXISTS settings (
+                    option TEXT PRIMARY KEY,
+                    value TEXT
+                );""")
+                connection.commit()
+
+                connection.close()
+                print("Database initialized")
+        except Exception as e:
+            print("Couldnt create Database:\n\n")
+            print(e)
 
 
-    # used for full database control, like creating tables, inserting data, etc.
+    # Für komplette Datenbank kontrolle ohne Rückgabewert
     def execute(self, command):
-        # Diese Methode ist fuer Schreibbefehle gedacht, zum Beispiel INSERT
-        # oder DELETE. Eine Verbindung wird nur einmal pro Manager aufgebaut.
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
         self.cursor.execute(command)
         self.connection.commit()
-        # `commit` bestaetigt die Aenderung dauerhaft in der Datei.
         print("Command executed successfully.")
 
 
@@ -109,12 +103,47 @@ class DatabaseManager:
         # Die Werte kommen aus dem Formular in table.py und werden als neuer
         # Datensatz in `inventory` gespeichert.
         self.execute("PRAGMA foreign_keys = ON;")
-        self.execute("INSERT INTO inventory (InventarNr, Device, Type, Location) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
+        self.execute("INSERT INTO inventory (InventarNr, Device, Type_Id, Assignee_Id) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
 
     def device_delete(self, id):
         """Delete a device from the inventory table."""
         # Geloescht wird ueber die eindeutige ID, nicht ueber den Geraetenamen.
         self.execute("DELETE FROM inventory WHERE InventarNr = '{}'".format(id))
+
+    def employee_create(self, Name, Surname, Department):
+        self.execute("PRAGMA foreign_keys = ON;")
+        self.execute("INSERT INTO employees (Name, Surname, Department) VALUES ('{}', '{}', '{}')".format(Name, Surname, Department))
+
+    def employee_delete(self, id):
+        self.execute("DELETE FROM employees WHERE EmployeeId = '{}'".format(id,))
+
+    def employees(self):
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+        self.cursor.execute("""SELECT employeeId, Name, Surname FROM employees """)
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
+
+    def type_create(self, Type, Short):
+        self.execute("PRAGMA foreign_keys = ON;")
+        self.execute("INSERT INTO devicetypes (TypeId, Short) VALUES ('{}', '{}')".format(Type, Short))
+
+    def type_delete(self, id):
+        self.execute("DELETE FROM devicetypes WHERE TypeId = '{}'".format(id,))
+
+    def types(self):
+        """Run a SELECT query and return (column_names, rows)."""
+        # Die Suche verbindet ID, Geraet, Typ und Ort zu einem Suchbereich.
+        # Dadurch findet ein Begriff Treffer in jeder sichtbaren Spalte.
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+        self.cursor.execute("""SELECT * FROM devicetypes """)
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
 
     # used to build tables which returns the column names and rows of the database updates table
     def fetch_query(self, query):
@@ -143,18 +172,8 @@ class DatabaseManager:
         rows = self.cursor.fetchall()
         return column_names, rows
 
-    def types(self):
-        """Run a SELECT query and return (column_names, rows)."""
-        # Die Suche verbindet ID, Geraet, Typ und Ort zu einem Suchbereich.
-        # Dadurch findet ein Begriff Treffer in jeder sichtbaren Spalte.
-        if not self.connection:
-            self.connection = sql3.connect(self.db_name)
-            self.cursor = self.connection.cursor()
-        self.cursor.execute("""SELECT Device, Key FROM devicetypes """)
-        column_names = [desc[0] for desc in self.cursor.description]
-        rows = self.cursor.fetchall()
-        return column_names, rows
 
+    # Unterstützt durch KI
     def get_next_highest_id(self, prefix):       
         # Nächste nummer für die InventarNr
         self.cursor.execute(

@@ -5,7 +5,9 @@ import flet as ft
 # einen Teil der Benutzeroberflaeche und gibt Flet-Steuerelemente zurueck.
 from views.dashboard import DashboardView
 from views.settings import SettingsView
-from views.table import TableView
+from views.device import DeviceView
+from views.type import TypeView
+from views.employee import EmployeeView
 from scripts.database import DatabaseManager
 
 # Die Datenbankdatei liegt im Ordner, aus dem `flet run` gestartet wird.
@@ -18,7 +20,7 @@ db_manager = DatabaseManager(DB_PATH)
 def main(page: ft.Page):
     # `page` ist das Hauptfenster bzw. die Browser-Seite von Flet. Alles, was
     # der Benutzer sieht, wird spaeter an diese Seite angehaengt.
-    page.title = "KeepUp"
+    page.title = "KeepIt"
     page.padding = 0
 
     # Die Anwendung benoetigt ihre Tabellen, bevor eine View Daten lesen kann.
@@ -35,14 +37,16 @@ def main(page: ft.Page):
         db_manager.initialize_database()
         )
 
-    # TableView liefert zwei Dinge zurueck:
+    # DeviceView liefert zwei Dinge zurueck:
     # - den Container, der spaeter im Inhaltsbereich angezeigt wird
     # - eine Funktion, mit der die Tabelle neu aus der Datenbank gelesen wird
-    table_container, refresh_table_view = TableView(page, db_manager)
+    device_container, refresh_devices = DeviceView(page, db_manager)
+    type_container, refresh_types = TypeView(page, db_manager)
+    employee_container, refresh_employees = EmployeeView(page, db_manager)
 
     # Dieses Bild ist das Logo oben in der Navigation. Die Quelle kann spaeter
     # je nach hellem oder dunklem Farbschema ausgetauscht werden.
-    keepup_icon = ft.Image(
+    keepit_icon = ft.Image(
         src="black-keepup-icon.svg",
         width=70,
         height=70,
@@ -51,7 +55,7 @@ def main(page: ft.Page):
 
     # Das Bild wird an `page` gespeichert, damit andere Funktionen dasselbe
     # Steuerelement spaeter erreichen und seine Bilddatei aendern koennen.
-    page.keepup_icon = keepup_icon 
+    page.keepit_icon = keepit_icon 
 
     # Allgemeine Hilfsfunktion fuer ein Hinweisfenster. Sie wird aktuell nicht
     # benutzt, bleibt aber als Vorlage fuer spaetere Dialoge erhalten.
@@ -81,9 +85,9 @@ def main(page: ft.Page):
     # Logo verwendet. Im hellen Schema wird das dunkle Logo verwendet.
     if page.theme_mode == ft.ThemeMode.SYSTEM:
         if page.platform_brightness == ft.Brightness.DARK:
-            page.keepup_icon.src = "white-keepup-icon.svg"
+            page.keepit_icon.src = "white-keepup-icon.svg"
         else:
-            page.keepup_icon.src = "black-keepup-icon.svg"
+            page.keepit_icon.src = "black-keepup-icon.svg"
 
 
 
@@ -100,17 +104,20 @@ def main(page: ft.Page):
             case 0:
                 # Die Dashboard-Seite wird als neuer Inhalt eingesetzt.
                 content_area.content = DashboardView(page, db_manager)
-                page.floating_action_button.visible = True
             case 1:
                 # Vor dem Anzeigen wird die Tabelle erneut aus der Datenbank
                 # geladen. So erscheinen neue Eintraege sofort.
-                page.floating_action_button.visible = True
-                content_area.content = table_container
-                content_area.update()  # attach it to the page tree FIRST
-                refresh_table_view()
-            #case 2:
-                #content_area.content = QueryView(page, db_manager)
-            #    page.floating_action_button.visible = True
+                content_area.content = device_container
+                content_area.update()
+                refresh_devices()
+            case 2:
+                content_area.content = type_container
+                content_area.update()
+                refresh_types()
+            case 3:
+                content_area.content = employee_container
+                content_area.update()
+                refresh_employees()
 
         page.update()
 
@@ -119,7 +126,6 @@ def main(page: ft.Page):
         # Navigation. Deshalb wird dort keine Destination markiert.
         rail.selected_index = None
         content_area.content = SettingsView()
-        page.floating_action_button.visible = False
         page.update()
 
  
@@ -136,10 +142,9 @@ def main(page: ft.Page):
             controls=[
                 # Logo und Trennlinien am oberen Ende der Navigation.
                 ft.Container(
-                    content=keepup_icon,
+                    content=keepit_icon,
                 ),
                 ft.Divider(height=1, thickness=1, color=ft.Colors.GREY_400),
-                # horizontal divider line below the icon
                 ft.Container(
                     bgcolor=ft.Colors.GREY_500,
                     height=2,
@@ -149,7 +154,7 @@ def main(page: ft.Page):
                 ),
             ],
         ),
-        # Jede Destination besitzt ein normales und ein ausgewaehltes Icon.
+        # Jede Destination besitzt ein normales und ein ausgewähltes Icon.
         # Flet zeigt ausserdem das hier angegebene Label an.
         destinations=[
             ft.NavigationRailDestination(
@@ -158,15 +163,20 @@ def main(page: ft.Page):
                 label="Home",
             ),
             ft.NavigationRailDestination(
-                icon=ft.CupertinoIcons.TABLE,
-                selected_icon=ft.CupertinoIcons.TABLE_FILL,
+                icon=ft.Icons.COMPUTER,
+                selected_icon=ft.Icons.COMPUTER,
                 label="Table",
             ),
-            #ft.NavigationRailDestination(
-            #    icon=ft.Icons.SEARCH_OUTLINED,
-            #    selected_icon=ft.Icons.SEARCH,
-            #    label="Query",
-            #),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.APPS,
+                selected_icon=ft.Icons.APPS,
+                label="Types",
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.PERSON_OUTLINE,
+                selected_icon=ft.Icons.PERSON,
+                label="Employees",
+            ),
         ],
         # `trailing` platziert die Einstellungen am unteren Ende der Leiste.
         trailing=ft.Container(
@@ -183,7 +193,7 @@ def main(page: ft.Page):
     )
 
     # Eine Row legt Navigation, Trennlinie und Inhaltsbereich nebeneinander.
-    # `expand=True` nutzt den gesamten verfuegbaren Platz.
+    # `expand=True` nutzt den gesamten verfügbaren Platz.
     page.add(
         ft.Row(
             controls=[rail, ft.VerticalDivider(width=1), content_area],

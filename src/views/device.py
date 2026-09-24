@@ -3,7 +3,7 @@ import flet as ft
 import flet_datatable2 as fdt
 
 
-def TableView(page: ft.Page, db_manager):
+def DeviceView(page: ft.Page, db_manager):
     # Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
     # stabiler als Geraetenamen, weil mehrere Geraete gleich heissen koennen.
     selected_titles = set()
@@ -18,10 +18,10 @@ def TableView(page: ft.Page, db_manager):
             columns, records = db_manager.search(search_query)
         else:
             columns, records = db_manager.fetch_query(
-                "SELECT InventarNr, Device, Type, Location FROM inventory"
+                "SELECT InventarNr, Device, Type_Id, Assignee_Id FROM inventory"
             )
 
-        def make_row(id, device, type_, location):
+        def make_row(id, device, type, location):
             # Aus einem Datenbank-Datensatz wird eine sichtbare Tabellenzeile.
             def handle_select_change(e: ft.Event[fdt.DataRow2]):
                 # Beim Anklicken einer Checkbox wird die ID in die Auswahl
@@ -43,7 +43,7 @@ def TableView(page: ft.Page, db_manager):
                 cells=[
                     ft.DataCell(content=ft.Text(str(id))),
                     ft.DataCell(content=ft.Text(device)),
-                    ft.DataCell(content=ft.Text(type_)),
+                    ft.DataCell(content=ft.Text(type)),
                     ft.DataCell(content=ft.Text(location)),
                 ],
             )
@@ -113,7 +113,7 @@ def TableView(page: ft.Page, db_manager):
             fdt.DataColumn2(label=ft.Text("InventarNr"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("Device"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("Type"), size=fdt.DataColumnSize.L),
-            fdt.DataColumn2(label=ft.Text("Location"), size=fdt.DataColumnSize.L),
+            fdt.DataColumn2(label=ft.Text("EmployeeId"), size=fdt.DataColumnSize.L),
         ],
         rows=build_rows(),
         on_select_all=handle_select_all,
@@ -124,20 +124,23 @@ def TableView(page: ft.Page, db_manager):
 
     device_field = ft.TextField(label="Device Name")
 
-    # mehrere daten benötigen "_," um diese zu entpacken
-    _, rows = db_manager.types()
-    # Fügt die optionen pro datenbankeintrag hinzu
-    dynamic_options = [
-        ft.dropdown.Option(key=str(row[0]), text=str(row[0])) for row in rows
-    ]
+    # Definition der Dropdown Menüs, sodass diese nicht nur innerhalb der Funktion verfügbar sind
+    select_type_drpdwn = ft.Dropdown(width=300, options=[], editable=True)
+    select_employee_drpdwn = ft.Dropdown(width=300, options=[], editable=True)
 
-    # Dynamisches Dropdownmenü aus Datenbankeinträgen für Feste Gerätetypen
-    type_field = ft.Dropdown(
-        width=300,
-        options=dynamic_options,
-    )
+    def refresh_dropdown_options():
 
-    location_field = ft.TextField(label="Location")
+        # 
+
+        _, type_rows = db_manager.types()
+        select_type_drpdwn.options = [
+            ft.dropdown.Option(key=str(row[0]), text=str(row[0])) for row in type_rows
+        ]
+
+        _, employee_rows = db_manager.employees()
+        select_employee_drpdwn.options = [
+            ft.dropdown.Option(key=str(row[0]), text=str(row[0]) + " | " + str(row[1]) + " " + str(row[2])) for row in employee_rows
+        ]
 
     def close_dialog(e):
         # Der Dialog wird geschlossen, ohne die Datenbank zu veraendern.
@@ -145,37 +148,40 @@ def TableView(page: ft.Page, db_manager):
         page.update()
 
     def save_entry(e):
-        # Werte aus den Eingabefeldern lesen und fuehrende/trailing Leerzeichen
-        # entfernen, bevor sie in der Datenbank gespeichert werden.
-        device = device_field.value.strip()
-        type = type_field.value.strip()
-        location = location_field.value.strip()
+        # Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
+        # "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
+        device = (device_field.value or "").strip()
+        device_type = (select_type_drpdwn.value or "").strip()
+        employee = (select_employee_drpdwn.value or "").strip()
 
-        # erstellt die InventarNr dynamisch mit den ausgewählten einträgen
-        device_id = type_field.value + db_manager.get_next_highest_id(type_field.value)
+        # Alte Fehlermeldungen zuruecksetzen
+        device_field.error = None
+        select_type_drpdwn.error_text = None
+        select_employee_drpdwn.error_text = None
+
+        # Validierung: alle Felder pruefen, damit mehrere Fehler gleichzeitig angezeigt werden
+        has_error = False
 
         if not device:
-            # `error_text` zeigt die Fehlermeldung direkt unter dem Feld an.
-            device_field.error_text = "Device is required"
+            device_field.error = "Device is required"
+            has_error = True
+
+        if not device_type:
+            select_type_drpdwn.error_text = "Type is required"
+            has_error = True
+
+        if not employee:
+            select_employee_drpdwn.error_text = "Employee is required"
+            has_error = True
+
+        if has_error:
             page.update()
             return
 
-        if not type:
-            type_field.error_text = "Type is required"
-            page.update()
-            return
+        # Erst nach erfolgreicher Validierung die InventarNr erzeugen
+        device_id = device_type + str(db_manager.get_next_highest_id(device_type))
 
-        if not location:
-            location_field.error_text = "Location is required"
-            page.update()
-            return
-
-        # Erst wenn alle drei Werte vorhanden sind, wird der Datensatz angelegt.
-        db_manager.device_create(device_id, device, type, location)
-
-        device_field.value = ""
-        type_field.value = ""
-        location_field.value = ""
+        db_manager.device_create(device_id, device, device_type, int(employee))
 
         page.pop_dialog()
         refresh_table()
@@ -185,7 +191,7 @@ def TableView(page: ft.Page, db_manager):
         modal=True,
         title=ft.Text("New Device"),
         content=ft.Column(
-            [device_field, type_field, location_field],
+            [device_field, select_type_drpdwn, select_employee_drpdwn],
             tight=True,
             spacing=10,
         ),
@@ -197,15 +203,16 @@ def TableView(page: ft.Page, db_manager):
     )
 
     def open_add_dialog(e):
+        refresh_dropdown_options()
         
         # Vor jedem Oeffnen werden die Felder zurueckgesetzt, damit kein alter
         # Inhalt aus einem vorherigen Dialog stehen bleibt.
-        type_field.value = ""
-        location_field.value = "None"
         page.show_dialog(add_dialog)
 
-    page.floating_action_button = ft.FloatingActionButton(
+    add_device_btn = ft.FloatingActionButton(
         icon=ft.Icons.ADD,
+        content=ft.Text("Add Device"),
+        width=150,
         on_click=open_add_dialog,
     )
 
@@ -213,7 +220,7 @@ def TableView(page: ft.Page, db_manager):
 
     # Das Suchfeld reagiert auf Enter; das Lupen-Icon ruft denselben Handler auf.
     query_field = ft.TextField(
-        label="Enter your Search Term",
+        label="Enter InventoryNr, Device Name, Type, Employee Name, Employee Surname",
         on_submit=run_query,
         expand=True,
     )
@@ -227,6 +234,7 @@ def TableView(page: ft.Page, db_manager):
                     [
                         query_field,
                         ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query),
+                        add_device_btn,
                     ],
                     expand=True,
                 ),
