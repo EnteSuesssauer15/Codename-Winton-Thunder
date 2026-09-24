@@ -1,96 +1,98 @@
-# pages/home.py
+# Diese Datei beschreibt den Inhalt der Home-Seite.
 import flet as ft
-import flet_datatable2 as fdt
-import os
-import sys
-import ctypes
 
-def DashboardView(page: ft.Page, db_manager):
-    selected_titles = set()
+# Hier gab es starke unterstützung von KI
 
-    def build_rows():
-        _, records = db_manager.fetch_query("SELECT title, description FROM updates")
-
-        def make_row(title, description):
-            def handle_select_change(e: ft.Event[fdt.DataRow2]):
-                e.control.selected = not e.control.selected
-                if e.control.selected:
-                    selected_titles.add(title)
-                else:
-                    selected_titles.discard(title)
-                e.control.update()
-
-            return fdt.DataRow2(
-                on_select_change=handle_select_change,
-                selected=title in selected_titles,
-                cells=[
-                    ft.DataCell(content=ft.Text(title)),
-                    ft.DataCell(content=ft.Text(description)),
-                ],
-            )
-
-        return [make_row(title, desc) for title, desc in records]
-
-    def handle_select_all(e):
-        _, records = db_manager.fetch_query("SELECT title, description FROM updates")
-        if e.data == "true":
-            selected_titles.update(title for title, _ in records)
-        else:
-            selected_titles.clear()
-        table.rows = build_rows()
-        table.update()
-
-    def handle_install_selected(e):
-        from scripts.updater import install_update_by_title
-        for title in list(selected_titles):
-            updater.install_update_by_title(title)
-
-    def refresh_table(e=None):
-        table.rows = build_rows()
-        table.update()
-
-    def search_for_updates(e):
-        updater_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "scripts", "updater.py")
-        )
-        ctypes.windll.shell32.ShellExecuteW(
-            None,
-            "runas",
-            sys.executable,
-            f'"{updater_path}" check_updates',
-            None,
-            0,  # SW_HIDE
-        )
-        # updater.py writes results to the DB in a separate elevated process,
-        # so this call returns immediately — the table won't reflect new
-        # rows until you refresh (see note below).
-
-    table = fdt.DataTable2(
-        expand=True,
-        show_checkbox_column=True,
-        fixed_top_rows=1,
-        empty=ft.Text("No updates found. Click 'Search for updates' to check."),
-        columns=[
-            fdt.DataColumn2(label=ft.Text("Title"), size=fdt.DataColumnSize.L),
-            fdt.DataColumn2(label=ft.Text("Description"), size=fdt.DataColumnSize.L),
-        ],
-        rows=build_rows(),
-        on_select_all=handle_select_all,
-    )
-
+def make_stat_card(title, value, icon):
+    # Erstellt jeweils eine Karte mit Icon und Text
     return ft.Container(
         content=ft.Column(
             [
-                ft.Text("Dashboard Page", size=28, weight=ft.FontWeight.BOLD),
+                ft.Icon(icon, size=32, color=ft.Colors.PRIMARY),
+                ft.Text(str(value), size=40, weight=ft.FontWeight.BOLD),
+                ft.Text(title, size=14, color=ft.Colors.ON_SURFACE_VARIANT),
+            ],
+            spacing=4,
+        ),
+        width=220,
+        padding=20,
+        border_radius=16,
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+    )
+
+
+def make_type_row(type_name, count, total):
+    # Prefab die mit daten gerufen wird und somit die Übersicht für Geräte pro Typ erstellt
+    if total > 0:
+        share = count / total
+    else:
+        share = 0
+
+    return ft.Row(
+        [
+            ft.Text(type_name, width=120),
+            ft.ProgressBar(value=share, expand=True, bar_height=10),
+            ft.Text(str(count), width=40, text_align=ft.TextAlign.END),
+        ],
+        spacing=15,
+    )
+
+
+def DashboardView(page: ft.Page, db_manager):
+    # Anzahl aus den 3 Tabellen anfordern
+    columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM inventory")
+    device_count = rows[0][0]
+
+    columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM employees")
+    employee_count = rows[0][0]
+
+    columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM devicetypes")
+    type_count = rows[0][0]
+
+    # Anzahl für Geräte pro Typ
+    columns, type_rows = db_manager.fetch_query(
+        "SELECT Type_Id, COUNT(*) FROM inventory GROUP BY Type_Id"
+    )
+
+    # Erstellt die "Tabelle" für die Anzahl der Geräten pro Typ
+    type_section = ft.Column(spacing=15)
+    if len(type_rows) == 0:
+        type_section.controls.append(ft.Text("No devices yet."))
+    else:
+        for row in type_rows:
+            type_section.controls.append(
+                make_type_row(row[0], row[1], device_count)
+            )
+
+    # Zusammenbau der Ansicht
+    return ft.Container(
+        content=ft.Column(
+            [
+                ft.Text("Dashboard", size=28, weight=ft.FontWeight.BOLD),
                 ft.Row(
                     [
-                        ft.Button("Search for updates", on_click=search_for_updates),
-                        ft.Button("Refresh list", on_click=refresh_table),
-                        ft.Button("Install selected", on_click=handle_install_selected),
-                    ]
+                        make_stat_card("Total devices", device_count, ft.Icons.DEVICES),
+                        make_stat_card("Employees", employee_count, ft.Icons.PEOPLE),
+                        make_stat_card("Device types", type_count, ft.Icons.CATEGORY),
+                    ],
+                    wrap=True,
+                    spacing=20,
                 ),
-                table,
+                ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Text("Devices per type", size=20, weight=ft.FontWeight.BOLD),
+                            type_section,
+                        ],
+                        spacing=20,
+                    ),
+                    padding=20,
+                    border_radius=16,
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                ),
             ],
+            spacing=25,
+            scroll=ft.ScrollMode.AUTO,
             expand=True,
         ),
         padding=20,

@@ -1,11 +1,14 @@
 [project]
-name = "KeepUp"
+name = "KeepIt"
 version = "0.1.0"
-description = ""
+description = "An Inventory Management Software"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Flet developer", email = "you@example.com" }
+    { name = "Nico"},
+    { name = "Joshua"},
+    { name = "Lars"},
+    { name = "Laura"},
 ]
 dependencies = [
     "flet>=0.86.5",
@@ -30,7 +33,7 @@ testpaths = ["tests"]
 [tool.flet]
 desktop_flavor = "light"    # Change to "full" to use flet-audio and flet-video
 org = "com.mycompany"
-product = "new-folder"
+product = "KeepIt"
 company = "Flet"
 copyright = "Copyright (C) 2023-2026 by Flet"
 
