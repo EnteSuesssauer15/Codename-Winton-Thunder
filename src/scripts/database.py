@@ -40,8 +40,7 @@ class DatabaseManager:
                 cursor.execute("""INSERT INTO devicetypes (TypeId, Short) VALUES 
                     ('Monitor', 'MON'),
                     ('Computer', 'CMP'),
-                    ('Päripherie', 'DV'),
-                    ('Lizenz', 'LZ');""")
+                    ('Peripherie', 'PER');""")
                 connection.commit()
 
                 cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
@@ -168,6 +167,26 @@ class DatabaseManager:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
         self.cursor.execute("""SELECT InventarNr, Device, Type, Location FROM inventory WHERE InventarNr || Device || Type || Location LIKE '%{}%'""".format(query))
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
+
+    def search_inventory(self, query):
+        """Search inventory and include the assigned employee's name."""
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+
+        search_pattern = f"%{query}%"
+        self.cursor.execute(
+            """SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id,
+                      inventory.Assignee_Id, employees.Name, employees.Surname
+               FROM inventory
+               JOIN employees ON employees.employeeId = inventory.Assignee_Id
+               WHERE inventory.InventarNr || inventory.Device || inventory.Type_Id
+                     || inventory.Assignee_Id || employees.Name || employees.Surname LIKE ?""",
+            (search_pattern,),
+        )
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows

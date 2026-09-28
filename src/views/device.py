@@ -15,13 +15,16 @@ def DeviceView(page: ft.Page, db_manager):
         # Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff
         # delegieren wir die Filterung an die Datenbankschicht.
         if search_query:
-            columns, records = db_manager.search(search_query)
+            columns, records = db_manager.search_inventory(search_query)
         else:
             columns, records = db_manager.fetch_query(
-                "SELECT InventarNr, Device, Type_Id, Assignee_Id FROM inventory"
+                """SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id,
+                          inventory.Assignee_Id, employees.Name, employees.Surname
+                   FROM inventory
+                   JOIN employees ON employees.employeeId = inventory.Assignee_Id"""
             )
 
-        def make_row(id, device, type, location):
+        def make_row(id, device, type, employee_id, employee_name, employee_surname):
             # Aus einem Datenbank-Datensatz wird eine sichtbare Tabellenzeile.
             def handle_select_change(e: ft.Event[fdt.DataRow2]):
                 # Beim Anklicken einer Checkbox wird die ID in die Auswahl
@@ -44,7 +47,9 @@ def DeviceView(page: ft.Page, db_manager):
                     ft.DataCell(content=ft.Text(str(id))),
                     ft.DataCell(content=ft.Text(device)),
                     ft.DataCell(content=ft.Text(type)),
-                    ft.DataCell(content=ft.Text(location)),
+                    ft.DataCell(content=ft.Text(str(employee_id))),
+                    ft.DataCell(content=ft.Text(employee_name)),
+                    ft.DataCell(content=ft.Text(employee_surname)),
                 ],
             )
 
@@ -87,9 +92,9 @@ def DeviceView(page: ft.Page, db_manager):
     def handle_select_all(e):
         # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
         # oder die Auswahl komplett leeren.
-        _, records = db_manager.fetch_query("SELECT InventarNr, Device, Type, Location FROM inventory")
+        _, records = db_manager.fetch_query("SELECT InventarNr FROM inventory")
         if e.data == "true":
-            selected_titles.update(id for id, _, _, _ in records)
+            selected_titles.update(record[0] for record in records)
         else:
             selected_titles.clear()
         refresh_table()
@@ -114,6 +119,8 @@ def DeviceView(page: ft.Page, db_manager):
             fdt.DataColumn2(label=ft.Text("Device"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("Type"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("EmployeeId"), size=fdt.DataColumnSize.L),
+            fdt.DataColumn2(label=ft.Text("Employee Name"), size=fdt.DataColumnSize.L),
+            fdt.DataColumn2(label=ft.Text("Employee Surname"), size=fdt.DataColumnSize.L),
         ],
         rows=build_rows(),
         on_select_all=handle_select_all,
