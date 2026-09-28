@@ -95,6 +95,8 @@ flet run --web
 - Dort werden Alle werte aus der Datenbank als Json exportiert und auch wieder importiert. 
 - Beim Import werden sämtliche Daten die zu dem Zeitpunkt in der Datenbank stehen überschrieben, sodass die Daten aus der Json absolut sind.
 
+- Außerdem hat man die Funktion die Einstellungen zu speichern, jedoch gibts keine einstellungen...man kann diese aber speichern in der Datenbank, da die logik implementiert ist.
+
 ## Wo liegt welcher Code?
 
 ```text
@@ -176,6 +178,13 @@ flet build web -v      # Web
 ```
 
 Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/).
+
+## Verwendung von KI
+
+KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie sowas programmiert wird es aber selbst implementiert.
+Ebenfalls wurden teilweise kommentare von KI geschrieben.
+
+In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, sodass es verständlicher wird.
 
 ## Anforderungen
 

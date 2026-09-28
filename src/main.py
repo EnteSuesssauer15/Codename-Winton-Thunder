@@ -165,7 +165,7 @@ def main(page: ft.Page):
             ft.NavigationRailDestination(
                 icon=ft.Icons.COMPUTER,
                 selected_icon=ft.Icons.COMPUTER,
-                label="Table",
+                label="Devices",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.APPS,
