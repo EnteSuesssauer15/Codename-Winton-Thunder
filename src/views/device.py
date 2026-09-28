@@ -174,12 +174,32 @@ def DeviceView(page: ft.Page, db_manager):
             select_employee_drpdwn.error_text = "Employee is required"
             has_error = True
 
+
+
+        # Zuweisung des Kürzels aus den Typen für die InventarNr
+        # Sodass dort CMPXXXXX steht statt ComputerXXXXX
+        _, type_rows = db_manager.types()
+        type_short = None
+
+        for row in type_rows:
+            type_id = str(row[0])
+            short_code = str(row[1])
+
+            if type_id == device_type:
+                type_short = short_code
+                break
+
+        if type_short is None:
+            select_type_drpdwn.error_text = "Select a valid type"
+            has_error = True
+            page.update()
+            return
+
         if has_error:
             page.update()
             return
 
-        # Erst nach erfolgreicher Validierung die InventarNr erzeugen
-        device_id = device_type + str(db_manager.get_next_highest_id(device_type))
+        device_id = type_short + str(db_manager.get_next_highest_id(type_short))
 
         db_manager.device_create(device_id, device, device_type, int(employee))
 
