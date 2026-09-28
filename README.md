@@ -117,7 +117,7 @@ enthält die Inventardaten und liegt im Hauptordner.
 5. Beim Speichern eines Geräts ruft die Tabelle `device_create(...)` auf. Die
 	Datenbank speichert den neuen Eintrag dauerhaft.
 
-## Eine kleine Aenderung machen
+## Eine kleine Änderung machen
 
 Für eine Änderung an der Inventartabelle ist meistens
 `src/views/table.py` die richtige Datei. Für die Navigation oder das Layout

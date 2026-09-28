@@ -13,6 +13,6 @@ if os.name == "nt":
     subprocess.check_call([venv_python, "-m", "pip", "install", "-r", "requirements.txt"])
 
 if os.name == "posix":
-    # Linux und macOS verwenden fuer denselben Interpreter den Ordner `bin`.
+    # Linux und macOS verwenden für denselben Interpreter den Ordner `bin`.
     venv_python = os.path.join(os.getcwd(), ".venv", "bin", "python")
     subprocess.check_call([venv_python, "-m", "pip", "install", "-r", "requirements.txt"])

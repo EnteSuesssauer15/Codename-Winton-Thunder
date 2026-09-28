@@ -5,14 +5,14 @@ import flet_datatable2 as fdt
 
 def DeviceView(page: ft.Page, db_manager):
     # Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
-    # stabiler als Geraetenamen, weil mehrere Geraete gleich heissen koennen.
+    # stabiler als Gerätenamen, weil mehrere Geräte gleich heißen können.
     selected_titles = set()
     loading_ring = ft.ProgressRing(value=None, visible=False)
 
 
     # --- Building / Searching to create and display in the table ---
     def build_rows(search_query=None):
-        # Ohne Suchbegriff werden alle Datensaetze geladen. Mit Suchbegriff
+        # Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff
         # delegieren wir die Filterung an die Datenbankschicht.
         if search_query:
             columns, records = db_manager.search(search_query)
@@ -34,7 +34,7 @@ def DeviceView(page: ft.Page, db_manager):
                 e.control.update()
 
                 delete_button.disabled = not bool(selected_titles)
-                # Der Zustand des Loeschbuttons haengt von der Auswahl ab.
+                # Der Zustand des Löschbuttons hängt von der Auswahl ab.
                 page.update()
 
             return fdt.DataRow2(
@@ -59,15 +59,15 @@ def DeviceView(page: ft.Page, db_manager):
         try:
             table.rows = build_rows(query if query else None)
         except Exception as ex:
-            # Bei einer ungueltigen Abfrage bleibt die Tabelle leer, statt die
-            # gesamte Benutzeroberflaeche abstuerzen zu lassen.
+            # Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die
+            # gesamte Benutzeroberfläche abstürzen zu lassen.
             table.rows = []
         table.update()
         loading_ring.visible = False
         page.update()
         
     def delete_selected():
-        # Jede markierte ID wird einzeln aus der Datenbank geloescht.
+        # Jede markierte ID wird einzeln aus der Datenbank gelöscht.
         if not selected_titles:
             return
 
@@ -79,13 +79,13 @@ def DeviceView(page: ft.Page, db_manager):
 
     def refresh_table(e=None):
         # Diese Funktion wird auch von main.py aufgerufen, wenn die Tabellen-
-        # Seite geoeffnet wird oder ein neuer Datensatz gespeichert wurde.
+        # Seite geöffnet wird oder ein neuer Datensatz gespeichert wurde.
         table.visible = True
         table.rows = build_rows()
         page.update()
 
     def handle_select_all(e):
-        # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswaehlen
+        # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
         # oder die Auswahl komplett leeren.
         _, records = db_manager.fetch_query("SELECT InventarNr, Device, Type, Location FROM inventory")
         if e.data == "true":
@@ -95,7 +95,7 @@ def DeviceView(page: ft.Page, db_manager):
         refresh_table()
     # --- Building / Searching to create and display in the table ---
 
-    # Der Button ist anfangs deaktiviert, weil noch keine Zeile ausgewaehlt ist.
+    # Der Button ist anfangs deaktiviert, weil noch keine Zeile ausgewählt ist.
     delete_button = ft.Button(
         "delete selected",
         icon=ft.CupertinoIcons.TRASH,
@@ -120,7 +120,7 @@ def DeviceView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geraets ---
+    # --- Dialog zum Anlegen eines neuen Geräts ---
 
     device_field = ft.TextField(label="Device Name")
 
@@ -143,7 +143,7 @@ def DeviceView(page: ft.Page, db_manager):
         ]
 
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu veraendern.
+        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
@@ -154,12 +154,12 @@ def DeviceView(page: ft.Page, db_manager):
         device_type = (select_type_drpdwn.value or "").strip()
         employee = (select_employee_drpdwn.value or "").strip()
 
-        # Alte Fehlermeldungen zuruecksetzen
+        # Alte Fehlermeldungen zurücksetzen
         device_field.error = None
         select_type_drpdwn.error_text = None
         select_employee_drpdwn.error_text = None
 
-        # Validierung: alle Felder pruefen, damit mehrere Fehler gleichzeitig angezeigt werden
+        # Validierung: alle Felder prüfen, damit mehrere Fehler gleichzeitig angezeigt werden
         has_error = False
 
         if not device:
@@ -225,7 +225,7 @@ def DeviceView(page: ft.Page, db_manager):
     def open_add_dialog(e):
         refresh_dropdown_options()
         
-        # Vor jedem Oeffnen werden die Felder zurueckgesetzt, damit kein alter
+        # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
         # Inhalt aus einem vorherigen Dialog stehen bleibt.
         page.show_dialog(add_dialog)
 
@@ -245,8 +245,8 @@ def DeviceView(page: ft.Page, db_manager):
         expand=True,
     )
 
-    # Hier werden Suchfeld, Loeschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` laesst die Tabelle den Platz ausfuellen.
+    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[
