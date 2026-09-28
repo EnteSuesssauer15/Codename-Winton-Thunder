@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import flet as ft
 import scripts.database as db
@@ -233,6 +234,16 @@ def SettingsView():
             ]),
             ft.Divider(),
             ft.Text("Settings", size=28, weight=ft.FontWeight.BOLD),
+            ft.Container(
+                content=ft.Row(tight=True, controls=[
+                    ft.Text("Database Path:"), 
+                    ft.Text(str(Path(db_manager.db_name).resolve()), selectable=True),
+                ]),
+                bgcolor=ft.Colors.BLUE_GREY_900,
+                border=ft.Border.all(1, ft.Colors.BLUE_ACCENT),
+                border_radius=6,
+                padding=10,
+            ),
             ft.Button("Save Settings", on_click=handle_save_settings),
         ]),
         padding=20,
