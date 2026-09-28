@@ -8,11 +8,11 @@ venv_dir = os.path.join(os.getcwd(), ".venv")
 venv.create(venv_dir, system_site_packages=True)
 
 if os.name == "nt":
-    # Windows speichert den Python-Interpreter unter `Scripts`.
+    # Windows
     venv_python = os.path.join(os.getcwd(), ".venv", "Scripts", "python.exe")
     subprocess.check_call([venv_python, "-m", "pip", "install", "-r", "requirements.txt"])
 
 if os.name == "posix":
-    # Linux und macOS verwenden fuer denselben Interpreter den Ordner `bin`.
+    # Linux und macOS
     venv_python = os.path.join(os.getcwd(), ".venv", "bin", "python")
     subprocess.check_call([venv_python, "-m", "pip", "install", "-r", "requirements.txt"])

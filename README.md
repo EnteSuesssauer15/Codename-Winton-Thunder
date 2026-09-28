@@ -10,6 +10,9 @@ gespeichert.
 ## Was wird benötigt?
 
 - Python 3.10 oder neuer
+- flet==0.86.5
+- flet-datatable2==0.86.5
+- pysqlite3==0.6.0
 
 ## Installation
 
@@ -68,20 +71,31 @@ Als Web-Anwendung im Browser:
 flet run --web
 ```
 
-Beim ersten Start wird automatisch die Datei `database.db` angelegt. Sie
-enthält die Inventardaten und liegt im Hauptordner.
-
 ## Die Anwendung benutzen
 
-- **Home** zeigt das Dashboard. Es ist derzeit eine einfache Startseite.
-- **Table** zeigt alle Einträge im Inventar.
-- Mit dem **Plus-Symbol** kann ein Gerät angelegt werden. Alle drei Felder
-  müssen ausgefüllt sein: Device, Type und Location.
-- Das **Suchfeld** filtert die Inventartabelle.
-- Ein oder mehrere Einträge können markiert und über **delete selected**
-  gelöscht werden.
-- **Settings** öffnet die Einstellungsseite. Das Speichern von Einstellungen
-  ist derzeit nur vorbereitet.
+- Beim ersten Start ist die Datenbank völlig leer, ausgenommen von 3 Beispieltypen.
+---
+- Um Geräte anlegen zu können, muss zuerst einen Mitarbeiter und ein Typ definiert werden.
+- Der Mitarbeiter wird in der `Employees` Ansicht erstellt.
+- Dort sowie auf den folgenden Ansichten befindet sich oben rechts ein Knopf mit dem sich ein Popup öffnet, in dem Der Name, Nachname und die Abteilung gefragt wird.
+- Drückt man dann auf Speichern hat man seinen ersten Mitarbeiter im System.
+---
+- Als nächstes wird ein Typ in der `Types` Ansicht erstellt.
+- Typen agieren als eine art Kategorie, hierzu legt man den Kategorienamen fest und auch den Prefix der später in der Inventarnummer stehen wird.
+- Auch hier sieht man nach dem speichern seinen ersten Typ in der Tabelle.
+---
+- Nun wird das erste Gerät in der `Devices` Ansicht erstellt.
+- Die Erstellung von Geräten ist Besonders einfach gestaltet. Zuerst wird nach der Gerätebezeichnung gefragt, Könnte Marke Modell oder auch Seriennummer enthalten - Freie entscheidung.
+- Da gerade schon ein Mitarbeiter und ein Typ erstellt wurde, wird hier nur noch per Dropdown jeweiliges ausgewählt.
+- Ist das Gerät gespeichert sieht man in der Tabelle die Inventarnummer, Marke Modell oder Seriennummer sowie den Typ, die Eindeutige ID eines Mitarbeiters als auch den Namen und Nachnamen.
+---
+- Wenn man jetzt in die Home Ansicht sich das Dashboard anschaut sieht man, dass alles was man gerade angelegt hat auch dort gezählt wird.
+
+- Möchte man sein System extern Speichern als Backup beispielsweise kann man auf dem Zahnrad in der Seitenleiste die Einstellungsansicht öffnen.
+- Dort werden Alle werte aus der Datenbank als Json exportiert und auch wieder importiert. 
+- Beim Import werden sämtliche Daten die zu dem Zeitpunkt in der Datenbank stehen überschrieben, sodass die Daten aus der Json absolut sind.
+
+- Außerdem hat man die Funktion die Einstellungen zu speichern, jedoch gibts keine einstellungen...man kann diese aber speichern in der Datenbank, da die logik implementiert ist.
 
 ## Wo liegt welcher Code?
 
@@ -89,56 +103,46 @@ enthält die Inventardaten und liegt im Hauptordner.
 .
 ├── README.md              Diese Anleitung
 ├── dev_setup.py           Erstellt .venv und installiert Pakete
-├── pyproject.toml         Projektname, Abhängigkeiten und Flet-Konfiguration
+├── pyproject.toml         (Automatisch erstellt) Projektname, Abhängigkeiten und Flet-Konfiguration
 ├── requirements.txt       Benötigte Python-Pakete
 ├── src/
 │   ├── main.py            Startpunkt und Navigation der Anwendung
 │   ├── scripts/
 │   │   └── database.py    Zugriff auf die SQLite-Datenbank
 │   ├── views/
+│   │   ├── dashboard.py   Dashboard-Seite
 │   │   ├── devices.py     Geräte-Seite
-|   |   ├── types.py       Gerätetypen-Seite
-|   |   ├── locations.py   Orte-Seite
-│   │   ├── settings.py    Einstellungsseite
+|   |   ├── type.py        Gerätetypen-Seite
+|   |   ├── employee.py    Mitarbeiter-Seite
+│   │   ├── settings.py    Einstellungen-Seite
 │   └── assets/            Bilder und Logos
-└── tests/                 Automatisierte Tests
+└── tests/                 (Automatisch erstellt) Automatisierte Tests
 ```
 
-### Wie fliesst eine Aktion durch das Programm?
+### Wie fließt eine Aktion durch das Programm?
 
 1. `flet run` verwendet wegen der Einstellung in `pyproject.toml` den Ordner
 	`src` und startet `main.py`.
-2. `main.py` erstellt einen `DatabaseManager` und prüft, ob `database.db`
+2. `main.py` erstellt den `DatabaseManager` aus `scripts/database.py` und prüft, ob `database.db`
 	existiert.
-3. Fehlt die Datei, erstellt `database.py` die Tabellen `devicetypes`, `inventory` und
+3. Fehlt die Datei, erstellt `database.py` die Tabellen `inventory`, `types`, `employees` und
 	`settings`.
-4. `table.py` liest die Daten aus `inventory` und baut daraus die sichtbare
-	Tabelle.
-5. Beim Speichern eines Geräts ruft die Tabelle `device_create(...)` auf. Die
-	Datenbank speichert den neuen Eintrag dauerhaft.
+4. `devices.py` liest die Daten aus `inventory` und baut daraus die sichtbare
+	Tabelle. Selbes vorgehen ist auch bei `type.py` und `employee.py` aus den
+	Tabellen `devicetypes` und `employees`.
+5. Beim erstellen eines `Typen`, `Employee` oder `Device` wird jeweils ihre eigene Funktion verwendet.
+	Jede Funktion führt jeweils einen SQL Befehl auf die dementsprechende Tabelle aus mit mitgegebenen werten aus variablen.
 
-## Eine kleine Aenderung machen
+## Eine kleine Änderung machen
 
-Für eine Änderung an der Inventartabelle ist meistens
-`src/views/table.py` die richtige Datei. Für die Navigation oder das Layout
-des Hauptfensters ist `src/main.py` zuständig. Neue Datenbankfunktionen gehören
-nach `src/scripts/database.py`.
+Für eine Änderung an der Anwendung ist es übersichtlich gestaltet.
+
+Beispielsweise ist man unzufrieden wie Geräte dargestellt werden, ändert man den code in der `devices.py`.
 
 Nach einer Änderung:
 
-1. Anwendung beenden und mit `flet run` neu starten.
-2. Die betroffene Funktion in der Oberfläche ausprobieren.
-3. Tests ausführen:
+Anwendung beenden und mit `flet run` neu starten.
 
-	```bash
-	pytest
-	```
-
-	Alternativ kann Flet-Tests mit folgendem Befehl starten:
-
-	```bash
-	flet test
-	```
 
 ## Datenbank zurücksetzen
 
@@ -175,6 +179,13 @@ flet build web -v      # Web
 
 Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/).
 
+## Verwendung von KI
+
+KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie sowas programmiert wird es aber selbst implementiert.
+Ebenfalls wurden teilweise kommentare von KI geschrieben.
+
+In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, sodass es verständlicher wird.
+
 ## Anforderungen
 
 [Excalidraw](https://excalidraw.com/#room=8af59903bd29f5051c35,2fg6w04Sic9SkeJsk8R1cA)
@@ -188,5 +199,5 @@ Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/)
 [Excalidraw](https://excalidraw.com/#room=0e5fddbb5bf03e019d6b,Rz1cnnvJuAKWnrCQ02-RFA)
 
 ## Programm Ablauf
-
+Nicht aktuell
 [Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)

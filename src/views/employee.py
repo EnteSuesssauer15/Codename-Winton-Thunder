@@ -113,14 +113,14 @@ def EmployeeView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geraets ---
+    # --- Dialog zum Anlegen eines neuen Geräts ---
 
     add_employee_dialog_name = ft.TextField(label="Name")
     add_employee_dialog_surname = ft.TextField(label="Surname")
     add_employee_dialog_department = ft.TextField(label="Department")
 
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu veraendern.
+        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
@@ -178,7 +178,7 @@ def EmployeeView(page: ft.Page, db_manager):
 
     def open_add_dialog(e):
         
-        # Vor jedem Oeffnen werden die Felder zurueckgesetzt, damit kein alter
+        # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
         # Inhalt aus einem vorherigen Dialog stehen bleibt.
         add_employee_dialog_name.value = ""
         add_employee_dialog_surname.value = ""
@@ -203,8 +203,8 @@ def EmployeeView(page: ft.Page, db_manager):
         expand=True,
     )
 
-    # Hier werden Suchfeld, Loeschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` laesst die Tabelle den Platz ausfuellen.
+    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[

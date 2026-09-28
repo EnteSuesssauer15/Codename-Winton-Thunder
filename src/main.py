@@ -2,7 +2,7 @@
 import flet as ft
 
 # Die drei Views sind die sichtbaren Seiten der Anwendung. Jede Funktion baut
-# einen Teil der Benutzeroberflaeche und gibt Flet-Steuerelemente zurueck.
+# einen Teil der Benutzeroberfläche und gibt Flet-Steuerelemente zurück.
 from views.dashboard import DashboardView
 from views.settings import SettingsView
 from views.device import DeviceView
@@ -19,11 +19,11 @@ db_manager = DatabaseManager(DB_PATH)
 
 def main(page: ft.Page):
     # `page` ist das Hauptfenster bzw. die Browser-Seite von Flet. Alles, was
-    # der Benutzer sieht, wird spaeter an diese Seite angehaengt.
+    # der Benutzer sieht, wird später an diese Seite angehängt.
     page.title = "KeepIt"
     page.padding = 0
 
-    # Die Anwendung benoetigt ihre Tabellen, bevor eine View Daten lesen kann.
+    # Die Anwendung benötigt ihre Tabellen, bevor eine View Daten lesen kann.
     # Wenn die Datei noch fehlt, legt DatabaseManager sie mit den Tabellen
     # `inventory` und `settings` an.
     if not db_manager.exists():
@@ -37,14 +37,14 @@ def main(page: ft.Page):
         db_manager.initialize_database()
         )
 
-    # DeviceView liefert zwei Dinge zurueck:
-    # - den Container, der spaeter im Inhaltsbereich angezeigt wird
+    # DeviceView liefert zwei Dinge zurück:
+    # - den Container, der später im Inhaltsbereich angezeigt wird
     # - eine Funktion, mit der die Tabelle neu aus der Datenbank gelesen wird
     device_container, refresh_devices = DeviceView(page, db_manager)
     type_container, refresh_types = TypeView(page, db_manager)
     employee_container, refresh_employees = EmployeeView(page, db_manager)
 
-    # Dieses Bild ist das Logo oben in der Navigation. Die Quelle kann spaeter
+    # Dieses Bild ist das Logo oben in der Navigation. Die Quelle kann später
     # je nach hellem oder dunklem Farbschema ausgetauscht werden.
     keepit_icon = ft.Image(
         src="black-keepup-icon.svg",
@@ -54,11 +54,11 @@ def main(page: ft.Page):
     )
 
     # Das Bild wird an `page` gespeichert, damit andere Funktionen dasselbe
-    # Steuerelement spaeter erreichen und seine Bilddatei aendern koennen.
+    # Steuerelement später erreichen und seine Bilddatei ändern können.
     page.keepit_icon = keepit_icon 
 
-    # Allgemeine Hilfsfunktion fuer ein Hinweisfenster. Sie wird aktuell nicht
-    # benutzt, bleibt aber als Vorlage fuer spaetere Dialoge erhalten.
+    # Allgemeine Hilfsfunktion für ein Hinweisfenster. Sie wird aktuell nicht
+    # benutzt, bleibt aber als Vorlage für spätere Dialoge erhalten.
     def alert_popup(title, message, actions=None):
         def default_ok(e):
             page.pop_dialog()
@@ -73,7 +73,7 @@ def main(page: ft.Page):
         )
         page.show_dialog(dialog)
 
-    # Diese Funktion waere der Klick-Handler fuer den alten "Create"-Button
+    # Diese Funktion wäre der Klick-Handler für den alten "Create"-Button
     # des Datenbank-Dialogs. Die Datenbank wird inzwischen direkt beim Start
     # angelegt, daher wird diese Funktion aktuell nicht aufgerufen.
     def create_file(e):
@@ -93,11 +93,11 @@ def main(page: ft.Page):
 
 # ------------------------------------------------------------------------------------------------------
 
-    # `content_area` ist ein Platzhalter fuer die aktuell ausgewaehlte Seite.
+    # `content_area` ist ein Platzhalter für die aktuell ausgewählte Seite.
     content_area = ft.Container(content=DashboardView(page, db_manager), expand=True)
 
     # Dieser Handler tauscht die Seite aus, sobald sich die Auswahl der
-    # Navigation aendert. Der Index 0 steht fuer Home, Index 1 fuer Table.
+    # Navigation ändert. Der Index 0 steht für Home, Index 1 für Table.
     def on_nav_change(e):
         index = e.control.selected_index
         match index:
@@ -106,7 +106,7 @@ def main(page: ft.Page):
                 content_area.content = DashboardView(page, db_manager)
             case 1:
                 # Vor dem Anzeigen wird die Tabelle erneut aus der Datenbank
-                # geladen. So erscheinen neue Eintraege sofort.
+                # geladen. So erscheinen neue Einträge sofort.
                 content_area.content = device_container
                 content_area.update()
                 refresh_devices()
@@ -165,7 +165,7 @@ def main(page: ft.Page):
             ft.NavigationRailDestination(
                 icon=ft.Icons.COMPUTER,
                 selected_icon=ft.Icons.COMPUTER,
-                label="Table",
+                label="Devices",
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.APPS,

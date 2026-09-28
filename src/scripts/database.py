@@ -40,8 +40,7 @@ class DatabaseManager:
                 cursor.execute("""INSERT INTO devicetypes (TypeId, Short) VALUES 
                     ('Monitor', 'MON'),
                     ('Computer', 'CMP'),
-                    ('Päripherie', 'DV'),
-                    ('Lizenz', 'LZ');""")
+                    ('Peripherie', 'PER');""")
                 connection.commit()
 
                 cursor.execute("""CREATE TABLE IF NOT EXISTS inventory (
@@ -93,7 +92,7 @@ class DatabaseManager:
             self.cursor = self.connection.cursor()
         self.cursor.execute("SELECT value FROM settings WHERE option = '{}'".format(setting))
         result = self.cursor.fetchone()
-        # Gibt es keinen Eintrag, liefert die Methode None zurueck.
+        # Gibt es keinen Eintrag, liefert die Methode None zurück.
         return result[0] if result else None
 
 
@@ -107,7 +106,7 @@ class DatabaseManager:
 
     def device_delete(self, id):
         """Delete a device from the inventory table."""
-        # Geloescht wird ueber die eindeutige ID, nicht ueber den Geraetenamen.
+        # Gelöscht wird über die eindeutige ID, nicht über den Gerätenamen.
         self.execute("DELETE FROM inventory WHERE InventarNr = '{}'".format(id))
 
     def employee_create(self, Name, Surname, Department):
@@ -135,7 +134,7 @@ class DatabaseManager:
 
     def types(self):
         """Run a SELECT query and return (column_names, rows)."""
-        # Die Suche verbindet ID, Geraet, Typ und Ort zu einem Suchbereich.
+        # Die Suche verbindet ID, Gerät, Typ und Ort zu einem Suchbereich.
         # Dadurch findet ein Begriff Treffer in jeder sichtbaren Spalte.
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
@@ -148,8 +147,8 @@ class DatabaseManager:
     # used to build tables which returns the column names and rows of the database updates table
     def fetch_query(self, query):
         """Run a SELECT query and return (column_names, rows)."""
-        # Diese Methode fuehrt eine SELECT-Abfrage aus und gibt sowohl die
-        # Spaltennamen als auch alle gefundenen Zeilen zurueck.
+        # Diese Methode führt eine SELECT-Abfrage aus und gibt sowohl die
+        # Spaltennamen als auch alle gefundenen Zeilen zurück.
         if not self.connection:
             self.connection = sql3.connect(self.db_name, check_same_thread=False)
             self.cursor = self.connection.cursor()
@@ -162,12 +161,32 @@ class DatabaseManager:
     # used to search for updates in the database based on a simple term
     def search(self, query):
         """Run a SELECT query and return (column_names, rows)."""
-        # Die Suche verbindet ID, Geraet, Typ und Ort zu einem Suchbereich.
+        # Die Suche verbindet ID, Gerät, Typ und Ort zu einem Suchbereich.
         # Dadurch findet ein Begriff Treffer in jeder sichtbaren Spalte.
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
         self.cursor.execute("""SELECT InventarNr, Device, Type, Location FROM inventory WHERE InventarNr || Device || Type || Location LIKE '%{}%'""".format(query))
+        column_names = [desc[0] for desc in self.cursor.description]
+        rows = self.cursor.fetchall()
+        return column_names, rows
+
+    def search_inventory(self, query):
+        """Search inventory and include the assigned employee's name."""
+        if not self.connection:
+            self.connection = sql3.connect(self.db_name)
+            self.cursor = self.connection.cursor()
+
+        search_pattern = f"%{query}%"
+        self.cursor.execute(
+            """SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id,
+                      inventory.Assignee_Id, employees.Name, employees.Surname
+               FROM inventory
+               JOIN employees ON employees.employeeId = inventory.Assignee_Id
+               WHERE inventory.InventarNr || inventory.Device || inventory.Type_Id
+                     || inventory.Assignee_Id || employees.Name || employees.Surname LIKE ?""",
+            (search_pattern,),
+        )
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows

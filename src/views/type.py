@@ -107,13 +107,13 @@ def TypeView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geraets ---
+    # --- Dialog zum Anlegen eines neuen Geräts ---
 
     add_type_dialog_devicetype = ft.TextField(label="Device Type")
     add_type_dialog_short = ft.TextField(label="Short", tooltip="Shorts will be visible at the beginning of every InventoryNr")
 
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu veraendern.
+        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
@@ -123,11 +123,11 @@ def TypeView(page: ft.Page, db_manager):
         type = (add_type_dialog_devicetype.value or "").strip()
         short = (add_type_dialog_short.value or "").strip()
 
-        # Alte Fehlermeldungen zuruecksetzen
+        # Alte Fehlermeldungen zurücksetzen
         add_type_dialog_devicetype.error = None
         add_type_dialog_short.error = None
 
-        # Validierung: alle Felder pruefen, damit mehrere Fehler gleichzeitig angezeigt werden
+        # Validierung: alle Felder prüfen, damit mehrere Fehler gleichzeitig angezeigt werden
         has_error = False
 
         if not type:
@@ -190,8 +190,8 @@ def TypeView(page: ft.Page, db_manager):
         expand=True,
     )
 
-    # Hier werden Suchfeld, Loeschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` laesst die Tabelle den Platz ausfuellen.
+    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[
