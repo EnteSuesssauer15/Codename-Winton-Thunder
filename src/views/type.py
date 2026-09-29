@@ -76,7 +76,7 @@ def TypeView(page: ft.Page, db_manager):
     def handle_select_all(e):
         # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
         # oder die Auswahl komplett leeren.
-        _, records = db_manager.fetch_query("SELECT InventarNr, Device, Type, Location FROM inventory")
+        _, records = db_manager.fetch_query("SELECT InventarNr, Device, Type_Id, Assignee_Id FROM inventory")
         if e.data == "true":
             selected_titles.update(id for id, _, _, _ in records)
         else:

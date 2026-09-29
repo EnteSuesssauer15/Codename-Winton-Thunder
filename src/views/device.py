@@ -234,6 +234,11 @@ def DeviceView(page: ft.Page, db_manager):
         
         # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
         # Inhalt aus einem vorherigen Dialog stehen bleibt.
+        device_field.value = ""
+        select_type_drpdwn.value = ""
+        select_employee_drpdwn.value = ""
+
+        
         page.show_dialog(add_dialog)
 
     add_device_btn = ft.FloatingActionButton(
