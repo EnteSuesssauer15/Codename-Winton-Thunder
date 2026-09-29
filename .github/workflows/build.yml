@@ -6,6 +6,9 @@ on:
     tags:
       - "v*"           # startet auch bei Tags wie v0.1.0
 
+permissions:
+  contents: write       # noetig, damit der Release-Job Dateien anhaengen darf
+
 jobs:
   build:
     strategy:
@@ -65,3 +68,29 @@ jobs:
         with:
           name: ${{ matrix.target }}-build
           path: build/${{ matrix.target }}
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ergebnisse herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Ordner zu ZIP-Dateien packen
+        run: |
+          cd artifacts
+          for ordner in *-build; do
+            zip -r "../${ordner}.zip" "$ordner"
+          done
+
+      - name: An Release anhängen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            windows-build.zip
+            macos-build.zip
+            linux-build.zip
