@@ -201,3 +201,7 @@ In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschr
 ## Programm Ablauf
 Nicht aktuell
 [Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)
+
+## Link zur Dokumentation
+
+[KeepIt Dokumentation](https://docs.google.com/document/d/1DGke-Ds1Lg0tazXipkGuDV4cOVIw2nPy0Qg5TGpkDDk/edit?usp=sharing)
