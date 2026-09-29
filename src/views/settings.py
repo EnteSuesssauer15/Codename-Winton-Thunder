@@ -71,7 +71,7 @@ def check_backup(data):
         if part not in data:
             raise ValueError("Backup file has no '" + part + "' part")
 
-    # Jeder der "Kategorien" muss jeden attribut enthalten der gefordert wird
+    # Jeder der "Kategorien" muss jedes Attribut enthalten welches gefordert wird
     check_backup_file(data["types"], ["TypeId", "Short"])
     check_backup_file(data["employees"], ["employeeId", "Name", "Surname", "Department"])
     check_backup_file(data["inventory"], ["InventarNr", "Device", "Type_Id", "Assignee_Id"])
