@@ -10,9 +10,6 @@ gespeichert.
 ## Was wird benötigt?
 
 - Python 3.10 oder neuer
-- flet==0.86.5
-- flet-datatable2==0.86.5
-- pysqlite3==0.6.0
 
 ## Installation
 
@@ -199,5 +196,5 @@ In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschr
 [Excalidraw](https://excalidraw.com/#room=0e5fddbb5bf03e019d6b,Rz1cnnvJuAKWnrCQ02-RFA)
 
 ## Programm Ablauf
-Nicht aktuell
+
 [Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)
