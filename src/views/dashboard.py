@@ -1,10 +1,10 @@
 # Diese Datei beschreibt den Inhalt der Home-Seite.
 import flet as ft
 
-# Hier gab es starke unterstützung von KI
+#! Hauptsächlich von KI Generiert worden
 
 def make_stat_card(title, value, icon):
-    # Erstellt jeweils eine Karte mit Icon und Text
+    #? Erstellt jeweils eine Karte mit Icon und Text
     return ft.Container(
         content=ft.Column(
             [
@@ -22,7 +22,7 @@ def make_stat_card(title, value, icon):
 
 
 def make_type_row(type_name, count, total):
-    # Prefab die mit daten gerufen wird und somit die Übersicht für Geräte pro Typ erstellt
+    #? Prefab die mit daten gerufen wird und somit die Übersicht für Geräte pro Typ erstellt
     if total > 0:
         share = count / total
     else:
@@ -39,7 +39,7 @@ def make_type_row(type_name, count, total):
 
 
 def DashboardView(page: ft.Page, db_manager):
-    # Anzahl aus den 3 Tabellen anfordern
+    #? Anzahl aus den 3 Tabellen anfordern
     columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM inventory")
     device_count = rows[0][0]
 
@@ -49,12 +49,12 @@ def DashboardView(page: ft.Page, db_manager):
     columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM devicetypes")
     type_count = rows[0][0]
 
-    # Anzahl für Geräte pro Typ
+    #? Anzahl für Geräte pro Typ
     columns, type_rows = db_manager.fetch_query(
         "SELECT Type_Id, COUNT(*) FROM inventory GROUP BY Type_Id"
     )
 
-    # Erstellt die "Tabelle" für die Anzahl der Geräten pro Typ
+    #? Erstellt die "Tabelle" für die Anzahl der Geräten pro Typ
     type_section = ft.Column(spacing=15)
     if len(type_rows) == 0:
         type_section.controls.append(ft.Text("No devices yet."))
@@ -64,7 +64,7 @@ def DashboardView(page: ft.Page, db_manager):
                 make_type_row(row[0], row[1], device_count)
             )
 
-    # Zusammenbau der Ansicht
+    #? Zusammenbau der Ansicht
     return ft.Container(
         content=ft.Column(
             [

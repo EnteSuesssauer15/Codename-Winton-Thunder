@@ -4,24 +4,28 @@ import flet_datatable2 as fdt
 
 
 def TypeView(page: ft.Page, db_manager):
+    #* Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
+    #* stabiler als Gerätenamen, weil mehrere Geräte gleich heißen können.
     selected_titles = set()
 
-    # --- Baut die Tabelle aus den Datenbankdaten zusammen ---
+    #? Anfang Erstellung der Tabelle aus den Datenbankeinträgen
     def build_rows(search_query=None):
-        # Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff
-        # delegieren wir die Filterung an die Datenbankschicht.
+        #? Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff delegieren wir die Filterung an die Datenbankschicht.
         if search_query:
-            columns, records = db_manager.search(search_query)
+            #? Festlegung der lokalen Variablen die von der aufgerufenen Funktion befüllt werden
+            columns, records = db_manager.search_type(search_query)
         else:
+            #? Hier werden alle Reihen ausgegeben, da nicht gesucht wird.
+            #? Die Variablen müssen ebenfalls deklariert werden und werden ebenfalls befüllt von der Funktion
             columns, records = db_manager.fetch_query(
                 "SELECT TypeId, Short FROM devicetypes"
             )
-
+        #! Wird erst am ende der Funktion aufgerufen
         def make_row(id, name):
             # Aus einem Datenbank-Datensatz wird eine sichtbare Tabellenzeile.
             def handle_select_change(e: ft.Event[fdt.DataRow2]):
-                # Beim Anklicken einer Checkbox wird die ID in die Auswahl
-                # aufgenommen oder wieder daraus entfernt.
+                #? Beim Anklicken einer Checkbox wird die ID in die Auswahl
+                #? aufgenommen oder wieder daraus entfernt.
                 e.control.selected = not e.control.selected
                 if e.control.selected:
                     selected_titles.add(id)
@@ -29,10 +33,13 @@ def TypeView(page: ft.Page, db_manager):
                     selected_titles.discard(id)
                 e.control.update()
 
+                #? Der Zustand des Löschbuttons hängt von der Auswahl ab.
                 type_delete_button.disabled = not bool(selected_titles)
-                # Der Zustand des Löschbuttons hängt von der Auswahl ab.
                 page.update()
 
+            #? Hier wird erst die Datenbank erstellt
+            #* Jeder Parameter braucht seine eigene DataCell in der Tabelle von Flet um jeden Wert eingeben zu können, es darf nie eine Spalte leer bleiben
+            #* Jeder durchlauf von dieser make_row Funktion erstellt hiermit eine einzige Reihe in der gesamten Tabelle
             return fdt.DataRow2(
                 on_select_change=handle_select_change,
                 selected=id in selected_titles,
@@ -41,22 +48,23 @@ def TypeView(page: ft.Page, db_manager):
                     ft.DataCell(content=ft.Text(name)),
                 ],
             )
-
+        #? Hier wird die Funktion make_row aufgerufen welche pro Spalte ihren eigenen Paremeter mitgegeben bekommt und pro Eintrag die Reihen erstellt
         return [make_row(*record) for record in records]
 
-    # Die Suche wird durch Enter oder das Lupen-Icon gestartet.
     def run_query(e):
         query = type_search_bar.value
-        # Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die
-        # gesamte Benutzeroberfläche abstürzen zu lassen.
+        #? Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die gesamte Benutzeroberfläche abstürzen zu lassen.
         try:
             table.rows = build_rows(query if query else None)
         except Exception as ex:
+            #? Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die gesamte Benutzeroberfläche abstürzen zu lassen.
             table.rows = []
         table.update()
+
+    # ? Anfang Löschfunktion (wiederholend pro Seite)
         
     def delete_selected():
-        # Jede markierte ID wird einzeln aus der Datenbank gelöscht.
+        #? Jede markierte ID wird einzeln aus der Datenbank gelöscht.
         if not selected_titles:
             return
 
@@ -64,27 +72,29 @@ def TypeView(page: ft.Page, db_manager):
             db_manager.type_delete(id)
             selected_titles.discard(id)
 
+        type_delete_button.disabled = True
+
         refresh_types()
 
+    #? Baut die Tabelle neu zusammen
     def refresh_types(e=None):
-        # Diese Funktion wird auch von main.py aufgerufen, wenn die Tabellen-
-        # Seite geöffnet wird oder ein neuer Datensatz gespeichert wurde.
         table.visible = True
         table.rows = build_rows()
         page.update()
 
     def handle_select_all(e):
-        # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
-        # oder die Auswahl komplett leeren.
-        _, records = db_manager.fetch_query("SELECT InventarNr, Device, Type_Id, Assignee_Id FROM inventory")
-        if e.data == "true":
-            selected_titles.update(id for id, _, _, _ in records)
+        #? Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen oder die Auswahl komplett leeren.
+        _, records = db_manager.fetch_query("SELECT TypeId, Short FROM devicetypes")
+        if e.data == True:
+            selected_titles.update(id for id, _, in records)
+            type_delete_button.disabled = False
         else:
             selected_titles.clear()
+            type_delete_button.disabled = True
         refresh_types()
-    # --- Building / Searching to create and display in the table ---
 
-    # Der Button ist anfangs deaktiviert, weil noch keine Zeile ausgewählt ist.
+    # ? Ende Löschfunktion (wiederholend pro Seite)
+
     type_delete_button = ft.Button(
         "delete selected",
         icon=ft.CupertinoIcons.TRASH,
@@ -92,6 +102,7 @@ def TypeView(page: ft.Page, db_manager):
         disabled=True,
     )
 
+    #? Definition des Tabellenobjekts
     table = fdt.DataTable2(
         visible=False,
         expand=True,
@@ -107,27 +118,29 @@ def TypeView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geräts ---
-
+    #? Dialog zum Anlegen eines neuen Typen
+    
+    #? Definition der Dropdown Menüs, sodass diese nicht nur innerhalb der Funktion verfügbar sind
     add_type_dialog_devicetype = ft.TextField(label="Device Type")
     add_type_dialog_short = ft.TextField(label="Short", tooltip="Shorts will be visible at the beginning of every InventoryNr")
 
+    #? Schließt das Popup Fenster auf "Cancel"
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
+    #? Speichert den neuen Eintrag auf "Save"
     def save_entry(e):
-        # Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
-        # "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
+        #? Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
+        #? "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
         type = (add_type_dialog_devicetype.value or "").strip()
         short = (add_type_dialog_short.value or "").strip()
 
-        # Alte Fehlermeldungen zurücksetzen
+        #? Alte Fehlermeldungen zurücksetzen
         add_type_dialog_devicetype.error = None
         add_type_dialog_short.error = None
 
-        # Validierung: alle Felder prüfen, damit mehrere Fehler gleichzeitig angezeigt werden
+        #? Validierung: alle Felder prüfen, sodass keines davon leer ist
         has_error = False
 
         if not type:
@@ -142,17 +155,19 @@ def TypeView(page: ft.Page, db_manager):
             page.update()
             return
 
-        # Erst wenn alle drei Werte vorhanden sind, wird der Datensatz angelegt.
+        #? Erst wenn alle drei Werte vorhanden sind, wird der Datensatz angelegt.
         db_manager.type_create(type, short)
 
         page.pop_dialog()
         refresh_types()
         page.update()
 
+    #? Popupobjekt welches hier definiert wird
     add_type_dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("New type"),
         content=ft.Column(
+            #? welche Objekte von Flet in diesem Dialog sein sollen
             [add_type_dialog_devicetype, add_type_dialog_short],
             tight=True,
             spacing=10,
@@ -165,17 +180,14 @@ def TypeView(page: ft.Page, db_manager):
     )
 
     def open_add_dialog(e):
-        
-        # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
-        # Inhalt aus einem vorherigen Dialog stehen bleibt.
+        #? Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter Inhalt aus einem vorherigen Dialog stehen bleibt.
         add_type_dialog_devicetype.value = ""
         add_type_dialog_short.value = ""
 
-        # Aufrufen des menüs
         page.show_dialog(add_type_dialog)
 
 
-    # Der Knopf, welcher das Menü zur Mitarbeitererstellung öffnet
+    #? Der Knopf, welcher das Menü zur Typenerstellung öffnet
     add_type_btn = ft.FloatingActionButton(
         icon=ft.Icons.ADD,
         content=ft.Text("Add type"),
@@ -183,23 +195,21 @@ def TypeView(page: ft.Page, db_manager):
         on_click=open_add_dialog,
     )
 
-    # Das Suchfeld reagiert auf Enter; das Lupen-Icon ruft denselben Handler auf.
+    #? Das Suchfeld
     type_search_bar = ft.TextField(
         label="Enter Type or Short",
         on_submit=run_query,
         expand=True,
     )
 
-    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
+    #? Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    #? zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[
                 ft.Row(
                     [
-                        type_search_bar,
-                        ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query),
-                        add_type_btn,
+                        type_search_bar, ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query), add_type_btn,
                     ],
                     expand=True,
                 ),

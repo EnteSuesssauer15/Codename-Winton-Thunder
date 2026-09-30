@@ -4,19 +4,19 @@ import flet_datatable2 as fdt
 
 
 def DeviceView(page: ft.Page, db_manager):
-    # Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
-    # stabiler als Gerätenamen, weil mehrere Geräte gleich heißen können.
+    #* Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
+    #* stabiler als Gerätenamen, weil mehrere Geräte gleich heißen können.
     selected_titles = set()
-    loading_ring = ft.ProgressRing(value=None, visible=False)
 
-
-    # --- Building / Searching to create and display in the table ---
+    #? Anfang Erstellung der Tabelle aus den Datenbankeinträgen
     def build_rows(search_query=None):
-        # Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff
-        # delegieren wir die Filterung an die Datenbankschicht.
+        #? Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff delegieren wir die Filterung an die Datenbankschicht.
         if search_query:
+            #? Festlegung der lokalen Variablen die von der aufgerufenen Funktion befüllt werden
             columns, records = db_manager.search_inventory(search_query)
         else:
+            #? Hier werden alle Reihen ausgegeben, da nicht gesucht wird.
+            #? Die Variablen müssen ebenfalls deklariert werden und werden ebenfalls befüllt von der Funktion
             columns, records = db_manager.fetch_query(
                 """SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id,
                           inventory.Assignee_Id, employees.Name, employees.Surname
@@ -24,11 +24,11 @@ def DeviceView(page: ft.Page, db_manager):
                    JOIN employees ON employees.employeeId = inventory.Assignee_Id"""
             )
 
+        #! Wird erst am ende der Funktion aufgerufen
         def make_row(id, device, type, employee_id, employee_name, employee_surname):
-            # Aus einem Datenbank-Datensatz wird eine sichtbare Tabellenzeile.
             def handle_select_change(e: ft.Event[fdt.DataRow2]):
-                # Beim Anklicken einer Checkbox wird die ID in die Auswahl
-                # aufgenommen oder wieder daraus entfernt.
+                #? Beim Anklicken einer Checkbox wird die ID in die Auswahl
+                #? aufgenommen oder wieder daraus entfernt.
                 e.control.selected = not e.control.selected
                 if e.control.selected:
                     selected_titles.add(id)
@@ -36,10 +36,14 @@ def DeviceView(page: ft.Page, db_manager):
                     selected_titles.discard(id)
                 e.control.update()
 
-                delete_button.disabled = not bool(selected_titles)
-                # Der Zustand des Löschbuttons hängt von der Auswahl ab.
+                #? Der Zustand des Löschbuttons hängt von der Auswahl ab.
+                device_delete_button.disabled = not bool(selected_titles)
+                
                 page.update()
 
+            #? Hier wird erst die Datenbank erstellt
+            #* Jeder Parameter braucht seine eigene DataCell in der Tabelle von Flet um jeden Wert eingeben zu können, es darf nie eine Spalte leer bleiben
+            #* Jeder durchlauf von dieser make_row Funktion erstellt hiermit eine einzige Reihe in der gesamten Tabelle
             return fdt.DataRow2(
                 on_select_change=handle_select_change,
                 selected=id in selected_titles,
@@ -53,26 +57,25 @@ def DeviceView(page: ft.Page, db_manager):
                 ],
             )
 
+        #? Hier wird die Funktion make_row aufgerufen welche pro Spalte ihren eigenen Paremeter mitgegeben bekommt und pro Eintrag die Reihen erstellt
         return [make_row(*record) for record in records]
 
 
     def run_query(e):
-        # Die Suche wird durch Enter oder das Lupen-Icon gestartet.
-        loading_ring.visible = True
         page.update()
         query = query_field.value
         try:
             table.rows = build_rows(query if query else None)
         except Exception as ex:
-            # Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die
-            # gesamte Benutzeroberfläche abstürzen zu lassen.
+            #? Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die gesamte Benutzeroberfläche abstürzen zu lassen.
             table.rows = []
         table.update()
-        loading_ring.visible = False
         page.update()
-        
+
+    # ? Anfang Löschfunktion (wiederholend pro Seite)
+
     def delete_selected():
-        # Jede markierte ID wird einzeln aus der Datenbank gelöscht.
+        #? Jede markierte ID wird einzeln aus der Datenbank gelöscht.
         if not selected_titles:
             return
 
@@ -82,32 +85,33 @@ def DeviceView(page: ft.Page, db_manager):
 
         refresh_table()
 
+    #? Baut die Tabelle neu zusammen
     def refresh_table(e=None):
-        # Diese Funktion wird auch von main.py aufgerufen, wenn die Tabellen-
-        # Seite geöffnet wird oder ein neuer Datensatz gespeichert wurde.
         table.visible = True
         table.rows = build_rows()
         page.update()
 
     def handle_select_all(e):
-        # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
-        # oder die Auswahl komplett leeren.
+        #? Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen oder die Auswahl komplett leeren.
         _, records = db_manager.fetch_query("SELECT InventarNr FROM inventory")
         if e.data == "true":
             selected_titles.update(record[0] for record in records)
+            device_delete_button.disabled = False
         else:
             selected_titles.clear()
+            device_delete_button.disabled = True
         refresh_table()
-    # --- Building / Searching to create and display in the table ---
 
-    # Der Button ist anfangs deaktiviert, weil noch keine Zeile ausgewählt ist.
-    delete_button = ft.Button(
+    # ? Ende Löschfunktion (wiederholend pro Seite)
+
+    device_delete_button = ft.Button(
         "delete selected",
         icon=ft.CupertinoIcons.TRASH,
         on_click=delete_selected,
         disabled=True,
     )
 
+    #? Definition des Tabellenobjekts
     table = fdt.DataTable2(
         visible=False,
         expand=True,
@@ -115,6 +119,7 @@ def DeviceView(page: ft.Page, db_manager):
         fixed_top_rows=1,
         empty=ft.Text("Inventory Empty"),
         columns=[
+            #? Hier kann der Anzeigenname der jeweiligen Spalte verändert werden
             fdt.DataColumn2(label=ft.Text("InventarNr"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("Device"), size=fdt.DataColumnSize.L),
             fdt.DataColumn2(label=ft.Text("Type"), size=fdt.DataColumnSize.L),
@@ -127,17 +132,18 @@ def DeviceView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geräts ---
+    #? Dialog zum Anlegen eines neuen Geräts
 
     device_field = ft.TextField(label="Device Name")
 
-    # Definition der Dropdown Menüs, sodass diese nicht nur innerhalb der Funktion verfügbar sind
-    select_type_drpdwn = ft.Dropdown(width=300, options=[], editable=True)
-    select_employee_drpdwn = ft.Dropdown(width=300, options=[], editable=True)
+    #? Definition der Dropdown Menüs, sodass diese nicht nur innerhalb der Funktion verfügbar sind
+    select_type_drpdwn = ft.Dropdown(width=300, options=[], label="Type", editable=True)
+    select_employee_drpdwn = ft.Dropdown(width=300, options=[], label="Employee", editable=True)
 
     def refresh_dropdown_options():
 
-        # 
+        #? Greift sich die neuesten Daten aus der Datenbank und schreibt diese in die 2 Dropdown Menüs
+        #? Wird bei jedem öffnen der Popups ausgeführt
 
         _, type_rows = db_manager.types()
         select_type_drpdwn.options = [
@@ -149,24 +155,25 @@ def DeviceView(page: ft.Page, db_manager):
             ft.dropdown.Option(key=str(row[0]), text=str(row[0]) + " | " + str(row[1]) + " " + str(row[2])) for row in employee_rows
         ]
 
+    #? Schließt das Popup Fenster auf "Cancel"
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
+    #? Speichert den neuen Eintrag auf "Save"
     def save_entry(e):
-        # Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
-        # "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
+        #? Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
+        #? "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
         device = (device_field.value or "").strip()
         device_type = (select_type_drpdwn.value or "").strip()
         employee = (select_employee_drpdwn.value or "").strip()
 
-        # Alte Fehlermeldungen zurücksetzen
+        #? Alte Fehlermeldungen zurücksetzen
         device_field.error = None
         select_type_drpdwn.error_text = None
         select_employee_drpdwn.error_text = None
 
-        # Validierung: alle Felder prüfen, damit mehrere Fehler gleichzeitig angezeigt werden
+        #? Validierung: alle Felder prüfen, sodass keines davon leer ist
         has_error = False
 
         if not device:
@@ -183,8 +190,7 @@ def DeviceView(page: ft.Page, db_manager):
 
 
 
-        # Zuweisung des Kürzels aus den Typen für die InventarNr
-        # Sodass dort CMPXXXXX steht statt ComputerXXXXX
+        #? Zuweisung des Kürzels aus den Typen für die InventarNr Sodass dort CMPXXXXX
         _, type_rows = db_manager.types()
         type_short = None
 
@@ -195,7 +201,7 @@ def DeviceView(page: ft.Page, db_manager):
             if type_id == device_type:
                 type_short = short_code
                 break
-
+        #? Prüft ob der eingegebene Typ auch existiert
         if type_short is None:
             select_type_drpdwn.error_text = "Select a valid type"
             has_error = True
@@ -206,18 +212,22 @@ def DeviceView(page: ft.Page, db_manager):
             page.update()
             return
 
+        #? Holt sich die nächsthöchste nummer aus der Datenbank mit demselben Kürzel und setzt den Kürzel vor die nummer
         device_id = type_short + str(db_manager.get_next_highest_id(type_short))
 
+        #? Speichern des Geräts indem ein neuer Datenbank eintrag geschrieben wird aus den angegebenen Daten
         db_manager.device_create(device_id, device, device_type, int(employee))
 
         page.pop_dialog()
         refresh_table()
         page.update()
 
+    #? Popupobjekt welches hier definiert wird
     add_dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("New Device"),
         content=ft.Column(
+            #? welche Objekte von Flet in diesem Dialog sein sollen
             [device_field, select_type_drpdwn, select_employee_drpdwn],
             tight=True,
             spacing=10,
@@ -232,15 +242,14 @@ def DeviceView(page: ft.Page, db_manager):
     def open_add_dialog(e):
         refresh_dropdown_options()
         
-        # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
-        # Inhalt aus einem vorherigen Dialog stehen bleibt.
+        #? Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter Inhalt aus einem vorherigen Dialog stehen bleibt.
         device_field.value = ""
         select_type_drpdwn.value = ""
         select_employee_drpdwn.value = ""
 
-        
         page.show_dialog(add_dialog)
 
+    #? Der Knopf zum hinzufügen von Geräten
     add_device_btn = ft.FloatingActionButton(
         icon=ft.Icons.ADD,
         content=ft.Text("Add Device"),
@@ -248,30 +257,26 @@ def DeviceView(page: ft.Page, db_manager):
         on_click=open_add_dialog,
     )
 
-    # Der FAB (Floating Action Button) ist das Plus-Symbol zum Anlegen.
-
-    # Das Suchfeld reagiert auf Enter; das Lupen-Icon ruft denselben Handler auf.
+    #? Das Suchfeld
     query_field = ft.TextField(
         label="Enter InventoryNr, Device Name, Type, Employee Name, Employee Surname",
         on_submit=run_query,
         expand=True,
     )
 
-    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
+    #? Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    #? zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[
                 ft.Row(
                     [
-                        query_field,
-                        ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query),
-                        add_device_btn,
+                        query_field, ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query), add_device_btn,
                     ],
                     expand=True,
                 ),
                 ft.Row([
-                    delete_button
+                    device_delete_button
                 ]),
                 ft.Container(content=table, expand=True),
             ],

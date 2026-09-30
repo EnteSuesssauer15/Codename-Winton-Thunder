@@ -4,24 +4,28 @@ import flet_datatable2 as fdt
 
 
 def EmployeeView(page: ft.Page, db_manager):
+    #* Diese Menge merkt sich die IDs der aktuell markierten Zeilen. IDs sind
+    #* stabiler als Gerätenamen, weil mehrere Geräte gleich heißen können.
     selected_titles = set()
 
-    # --- Baut die Tabelle aus den Datenbankdaten zusammen ---
+    #? Anfang Erstellung der Tabelle aus den Datenbankeinträgen
     def build_rows(search_query=None):
-        # Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff
-        # delegieren wir die Filterung an die Datenbankschicht.
+        #? Ohne Suchbegriff werden alle Datensätze geladen. Mit Suchbegriff delegieren wir die Filterung an die Datenbankschicht.
         if search_query:
-            columns, records = db_manager.search(search_query)
+            #? Festlegung der lokalen Variablen die von der aufgerufenen Funktion befüllt werden
+            columns, records = db_manager.search_employee(search_query)
         else:
+            #? Hier werden alle Reihen ausgegeben, da nicht gesucht wird.
+            #? Die Variablen müssen ebenfalls deklariert werden und werden ebenfalls befüllt von der Funktion
             columns, records = db_manager.fetch_query(
                 "SELECT employeeId, Name, Surname, Department FROM employees"
             )
 
+        #! Wird erst am ende der Funktion aufgerufen
         def make_row(employeeId, Name, Surname, Department):
-            # Aus einem Datenbank-Datensatz wird eine sichtbare Tabellenzeile.
             def handle_select_change(e: ft.Event[fdt.DataRow2]):
-                # Beim Anklicken einer Checkbox wird die ID in die Auswahl
-                # aufgenommen oder wieder daraus entfernt.
+                #? Beim Anklicken einer Checkbox wird die ID in die Auswahl
+                #? aufgenommen oder wieder daraus entfernt.
                 e.control.selected = not e.control.selected
                 if e.control.selected:
                     selected_titles.add(employeeId)
@@ -29,10 +33,14 @@ def EmployeeView(page: ft.Page, db_manager):
                     selected_titles.discard(employeeId)
                 e.control.update()
 
+                #? Der Zustand des Löschbuttons hängt von der Auswahl ab.
                 employee_delete_button.disabled = not bool(selected_titles)
-                # Der Zustand des Löschbuttons hängt von der Auswahl ab.
+
                 page.update()
 
+            #? Hier wird erst die Datenbank erstellt
+            #* Jeder Parameter braucht seine eigene DataCell in der Tabelle von Flet um jeden Wert eingeben zu können, es darf nie eine Spalte leer bleiben
+            #* Jeder durchlauf von dieser make_row Funktion erstellt hiermit eine einzige Reihe in der gesamten Tabelle
             return fdt.DataRow2(
                 on_select_change=handle_select_change,
                 selected=employeeId in selected_titles,
@@ -44,21 +52,22 @@ def EmployeeView(page: ft.Page, db_manager):
                 ],
             )
 
+        #? Hier wird die Funktion make_row aufgerufen welche pro Spalte ihren eigenen Paremeter mitgegeben bekommt und pro Eintrag die Reihen erstellt
         return [make_row(*record) for record in records]
 
-    # Die Suche wird durch Enter oder das Lupen-Icon gestartet.
     def run_query(e):
         query = employee_search_bar.value
-        # Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die
-        # gesamte Benutzeroberfläche abstürzen zu lassen.
         try:
             table.rows = build_rows(query if query else None)
         except Exception as ex:
+            #? Bei einer ungültigen Abfrage bleibt die Tabelle leer, statt die gesamte Benutzeroberfläche abstürzen zu lassen.
             table.rows = []
         table.update()
+
+    # ? Anfang Löschfunktion (wiederholend pro Seite)
         
     def delete_selected():
-        # Jede markierte ID wird einzeln aus der Datenbank gelöscht.
+        #? Jede markierte ID wird einzeln aus der Datenbank gelöscht.
         if not selected_titles:
             return
 
@@ -68,27 +77,29 @@ def EmployeeView(page: ft.Page, db_manager):
             print(selected_titles)
             print(id)
 
+        employee_delete_button.disabled = True
+
         refresh_employees()
 
+    #? Baut die Tabelle neu zusammen
     def refresh_employees(e=None):
-        # Diese Funktion wird auch von main.py aufgerufen, wenn die Tabellen-
-        # Seite geöffnet wird oder ein neuer Datensatz gespeichert wurde.
         table.visible = True
         table.rows = build_rows()
         page.update()
 
     def handle_select_all(e):
-        # Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen
-        # oder die Auswahl komplett leeren.
+        #? Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen oder die Auswahl komplett leeren.
         _, records = db_manager.fetch_query("SELECT employeeId, Name, Surname, Department FROM employees")
-        if e.data == "true":
+        if e.data == True:
             selected_titles.update(id for id, _, _, _ in records)
+            employee_delete_button.disabled = False
         else:
             selected_titles.clear()
+            employee_delete_button.disabled = True
         refresh_employees()
-    # --- Building / Searching to create and display in the table ---
 
-    # Der Button ist anfangs deaktiviert, weil noch keine Zeile ausgewählt ist.
+    # ? Ende Löschfunktion (wiederholend pro Seite)
+
     employee_delete_button = ft.Button(
         "delete selected",
         icon=ft.CupertinoIcons.TRASH,
@@ -96,6 +107,7 @@ def EmployeeView(page: ft.Page, db_manager):
         disabled=True,
     )
 
+    #? Definition des Tabellenobjekts
     table = fdt.DataTable2(
         visible=False,
         expand=True,
@@ -113,32 +125,34 @@ def EmployeeView(page: ft.Page, db_manager):
     )
 
 
-    # --- Dialog zum Anlegen eines neuen Geräts ---
+    #? Dialog zum Anlegen eines neuen Mitarbeiters
 
     add_employee_dialog_name = ft.TextField(label="Name")
     add_employee_dialog_surname = ft.TextField(label="Surname")
     add_employee_dialog_department = ft.TextField(label="Department")
 
+    #? Schließt das Popup Fenster auf "Cancel"
     def close_dialog(e):
-        # Der Dialog wird geschlossen, ohne die Datenbank zu verändern.
         page.pop_dialog()
         page.update()
 
+    #? Speichert den neuen Eintrag auf "Save"
     def save_entry(e):
-        # Werte aus den Eingabefeldern lesen und führende/trailing Leerzeichen
-        # entfernen, bevor sie in der Datenbank gespeichert werden.
+        #? Werte lesen; Dropdowns liefern None, wenn nichts gewählt wurde.
+        #? "or ''" macht daraus einen leeren String, damit .strip() sicher funktioniert.
         name = (add_employee_dialog_name.value or "").strip()
         surname = (add_employee_dialog_surname.value or "").strip()
         department = (add_employee_dialog_department.value or "").strip()
 
+        #? Alte Fehlermeldungen zurücksetzen
         add_employee_dialog_name.error = None
         add_employee_dialog_surname.error = None
         add_employee_dialog_department.error = None
 
+        #? Validierung: alle Felder prüfen, sodass keines davon leer ist
         has_error = False
 
         if not name:
-            # `error_text` zeigt die Fehlermeldung direkt unter dem Feld an.
             add_employee_dialog_name.error = "Name is required"
             has_error = True
 
@@ -154,17 +168,19 @@ def EmployeeView(page: ft.Page, db_manager):
             page.update()
             return
 
-        # Erst wenn alle drei Werte vorhanden sind, wird der Datensatz angelegt.
+        #? Erst wenn alle drei Werte vorhanden sind, wird der Datensatz angelegt.
         db_manager.employee_create(name, surname, department)
 
         page.pop_dialog()
         refresh_employees()
         page.update()
 
+    #? Popupobjekt welches hier definiert wird
     add_employee_dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("New Employee"),
         content=ft.Column(
+            #? welche Objekte von Flet in diesem Dialog sein sollen
             [add_employee_dialog_name, add_employee_dialog_surname, add_employee_dialog_department],
             tight=True,
             spacing=10,
@@ -177,18 +193,15 @@ def EmployeeView(page: ft.Page, db_manager):
     )
 
     def open_add_dialog(e):
-        
-        # Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter
-        # Inhalt aus einem vorherigen Dialog stehen bleibt.
+        #? Vor jedem Öffnen werden die Felder zurückgesetzt, damit kein alter Inhalt aus einem vorherigen Dialog stehen bleibt.
         add_employee_dialog_name.value = ""
         add_employee_dialog_surname.value = ""
         add_employee_dialog_department.value = ""
 
-        # Aufrufen des menüs
         page.show_dialog(add_employee_dialog)
 
 
-    # Der Knopf, welcher das Menü zur Mitarbeitererstellung öffnet
+    #? Der Knopf zum hinzufügen von Geräten
     add_employee_btn = ft.FloatingActionButton(
         icon=ft.Icons.ADD,
         content=ft.Text("Add Employee"),
@@ -196,23 +209,21 @@ def EmployeeView(page: ft.Page, db_manager):
         on_click=open_add_dialog,
     )
 
-    # Das Suchfeld reagiert auf Enter; das Lupen-Icon ruft denselben Handler auf.
+    #? Das Suchfeld
     employee_search_bar = ft.TextField(
         label="Enter Employee Name, Surname or Department",
         on_submit=run_query,
         expand=True,
     )
 
-    # Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
-    # zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
+    #? Hier werden Suchfeld, Löschbutton und Tabelle zu einer gemeinsamen View
+    #? zusammengesetzt. `expand=True` lässt die Tabelle den Platz ausfüllen.
     container = ft.Container(
         content=ft.Column(
             controls=[
                 ft.Row(
                     [
-                        employee_search_bar,
-                        ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query),
-                        add_employee_btn,
+                        employee_search_bar, ft.IconButton(icon=ft.Icons.SEARCH, on_click=run_query), add_employee_btn,
                     ],
                     expand=True,
                 ),
