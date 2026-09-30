@@ -28,6 +28,7 @@ def main(page: ft.Page):
     #? `employees`, `devicetypes`,`inventory` und `settings` an.
     if not db_manager.exists():
         db_manager.initialize_database()
+        db_manager.execute("PRAGMA foreign_keys = ON;")
 
     #* Jede View liefert zwei Dinge zurück:
     #* - den Container, der später im Inhaltsbereich angezeigt wird

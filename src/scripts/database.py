@@ -8,7 +8,6 @@ class DatabaseManager:
         self.db_name = db_name
         self.connection = None
         self.cursor = None
-        self.execute("PRAGMA foreign_keys = ON;")
 
     def exists(self):
         #? Prüfen ob eine "database.db" Datei vorhanden ist
@@ -58,8 +57,6 @@ class DatabaseManager:
                     value TEXT
                 );""")
                 connection.commit()
-
-                connection.close()
                 print("Database initialized")
         except Exception as e:
             print("Couldnt create Database:\n\n")
