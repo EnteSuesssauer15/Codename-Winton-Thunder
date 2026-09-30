@@ -17,12 +17,8 @@ def DeviceView(page: ft.Page, db_manager):
         else:
             #? Hier werden alle Reihen ausgegeben, da nicht gesucht wird.
             #? Die Variablen müssen ebenfalls deklariert werden und werden ebenfalls befüllt von der Funktion
-            columns, records = db_manager.fetch_query(
-                """SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id,
-                          inventory.Assignee_Id, employees.Name, employees.Surname
-                   FROM inventory
-                   JOIN employees ON employees.employeeId = inventory.Assignee_Id"""
-            )
+            columns, records = db_manager.fetch_query("""SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id, inventory.Assignee_Id, employees.Name, employees.Surname FROM inventory
+                   JOIN employees ON employees.employeeId = inventory.Assignee_Id""")
 
         #! Wird erst am ende der Funktion aufgerufen
         def make_row(id, device, type, employee_id, employee_name, employee_surname):
@@ -94,7 +90,7 @@ def DeviceView(page: ft.Page, db_manager):
     def handle_select_all(e):
         #? Der Kopf der Tabelle kann alle vorhandenen IDs auf einmal auswählen oder die Auswahl komplett leeren.
         _, records = db_manager.fetch_query("SELECT InventarNr FROM inventory")
-        if e.data == "true":
+        if e.data == True:
             selected_titles.update(record[0] for record in records)
             device_delete_button.disabled = False
         else:

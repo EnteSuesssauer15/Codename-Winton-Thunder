@@ -8,6 +8,7 @@ class DatabaseManager:
         self.db_name = db_name
         self.connection = None
         self.cursor = None
+        self.execute("PRAGMA foreign_keys = ON;")
 
     def exists(self):
         #? Prüfen ob eine "database.db" Datei vorhanden ist
@@ -96,7 +97,6 @@ class DatabaseManager:
     #? Erstellt neue Geräte anhand der 4 mitgegebenen Werte
     def device_create(self, id, device, type, location):
         #? Schaltet die Prüfung für Fremdschlüssel ein
-        self.execute("PRAGMA foreign_keys = ON;")
         self.execute("INSERT INTO inventory (InventarNr, Device, Type_Id, Assignee_Id) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
 
     #? Löscht geräte anhand ihrer InventarNr
@@ -106,13 +106,16 @@ class DatabaseManager:
     #? Erstellt neue Mitarbeiter anhand der 3 mitgegebenen Werte
     def employee_create(self, Name, Surname, Department):
         #? Schaltet die Prüfung für Fremdschlüssel ein
-        self.execute("PRAGMA foreign_keys = ON;")
         self.execute("INSERT INTO employees (Name, Surname, Department) VALUES ('{}', '{}', '{}')".format(Name, Surname, Department))
 
     #? Löscht Mitarbeiter anhand ihrer ID
     def employee_delete(self, id):
-        self.execute("DELETE FROM employees WHERE EmployeeId = '{}'".format(id,))
-
+        #? erzeugt einen fehler und gibt den zurück wenn der wert noch zugewiesen ist
+        try:
+            self.execute("DELETE FROM employees WHERE EmployeeId = '{}'".format(id,))
+        except Exception as e:
+            return e
+        
     #? Listet alle Mitarbeiter auf
     def employees(self):
         if not self.connection:
@@ -126,12 +129,16 @@ class DatabaseManager:
     #? Erstellt neue Typen anhand der 2 mitgegebenen Werte
     def type_create(self, Type, Short):
         #? Schaltet die Prüfung für Fremdschlüssel ein 
-        self.execute("PRAGMA foreign_keys = ON;")
         self.execute("INSERT INTO devicetypes (TypeId, Short) VALUES ('{}', '{}')".format(Type, Short))
 
     #? Löscht Typen anhand der ID
     def type_delete(self, id):
-        self.execute("DELETE FROM devicetypes WHERE TypeId = '{}'".format(id,))
+        #? erzeugt einen fehler und gibt den zurück wenn der wert noch zugewiesen ist
+        try:
+            self.execute("DELETE FROM devicetypes WHERE TypeId = '{}'".format(id,))
+        except Exception as e:
+            return e
+            
 
     #? Listet alle Typen
     def types(self):

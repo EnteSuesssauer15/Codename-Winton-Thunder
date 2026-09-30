@@ -71,15 +71,30 @@ def EmployeeView(page: ft.Page, db_manager):
         if not selected_titles:
             return
 
-        for id in list(selected_titles):
-            db_manager.employee_delete(id)
-            selected_titles.discard(id)
-            print(selected_titles)
-            print(id)
+        error = None
 
-        employee_delete_button.disabled = True
+        for id in list(selected_titles):
+            delete_error = db_manager.employee_delete(id)
+            if delete_error is not None:
+                error = delete_error
+            else:
+                selected_titles.discard(id)
+                employee_delete_button.disabled = True
 
         refresh_employees()
+
+        if error is not None:
+            page.show_dialog(
+                ft.AlertDialog(
+                    title=ft.Text("Cannot delete Employee"),
+                    content=ft.Column([
+                        ft.Text(size=16, value="This Employee is still assigned to one or more devices"),
+                        ft.Text(size=10, value=str(error)),
+                        ],
+                        tight=True,),
+                    actions=[ft.TextButton("OK", on_click=lambda e: page.pop_dialog())]
+                )
+            )
 
     #? Baut die Tabelle neu zusammen
     def refresh_employees(e=None):
