@@ -18,12 +18,15 @@ gespeichert.
    - [Datenbank zurücksetzen](#datenbank-zurücksetzen)
    - [App kompilieren](#app-kompilieren)
 3. [Verwendung von KI](#verwendung-von-ki)
-4. [ER Diagramm](#erdiagramm)
-5. [Programmablauf](#programmablauf)
+5. [Anforderungen an das Projekt](#anforderungen)
+6. [UI Entwurf](#ui-entwurf)
+7. [ER Diagramm](#erdiagramm)
+8. [Programmablauf](#programmablauf)
    - [Gerät anlegen](#gerät-anlegen)
    - [Typen und Mitarbeiter verwalten](#typen-und-mitarbeiter-verwalten)
    - [Backup und Wiederherstellung](#backup-und-wiederherstellung)
-6. [Dokumentation](#link-zur-Dokumentation)
+9. [Dokumentation](#link-zur-Dokumentation)
+10. [Reflexion](#reflexion)
 
 ## Die Anwendung benutzen
 
@@ -228,3 +231,7 @@ flowchart TD
 ## Link zur Dokumentation
 
 [KeepIt Dokumentation](https://docs.google.com/document/d/1DGke-Ds1Lg0tazXipkGuDV4cOVIw2nPy0Qg5TGpkDDk/edit?usp=sharing)
+
+## Reflexion
+
+
