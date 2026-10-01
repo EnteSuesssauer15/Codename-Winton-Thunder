@@ -15,7 +15,6 @@ dependencies = [
     "flet[test]==0.86.5",
     "flet-datatable2==0.86.5",
     "pysqlite3==0.6.0",
-    "jni>=1.1.0",
 ]
 
 [dependency-groups]
@@ -40,3 +39,6 @@ copyright = "Copyright (C) 2023-2026 by Flet"
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.flutter.pubspec.dependency_overrides]
+jni = "1.1.0"
