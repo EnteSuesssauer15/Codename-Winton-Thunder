@@ -15,6 +15,7 @@ dependencies = [
     "flet[test]==0.86.5",
     "flet-datatable2==0.86.5",
     "pysqlite3==0.6.0",
+    "jni>=1.1.0",
 ]
 
 [dependency-groups]
