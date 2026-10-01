@@ -18,7 +18,6 @@ DB_PATH = "database.db"
 db_manager = DatabaseManager(DB_PATH)
 
 
-
 def main(page: ft.Page):
     page.title = "KeepIt"
     page.padding = 0
