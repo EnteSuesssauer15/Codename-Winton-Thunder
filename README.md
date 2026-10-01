@@ -7,68 +7,31 @@ angezeigt, gesucht und wieder gelöscht werden. Die Oberfläche wird mit
 [Flet](https://flet.dev/) gebaut, die Daten werden in einer lokalen SQLite-Datei
 gespeichert.
 
-## Was wird benötigt?
+## Übersicht
 
-- Python 3.10 oder neuer
-
-## Installation
-
-1. Öffne ein Terminal im Hauptordner des Projekts. Das ist der Ordner, in dem
-	`README.md` und `dev_setup.py` liegen.
-2. Führe das Einrichtungs-Skript aus:
-
-	```bash
-	python3 dev_setup.py
-	```
-
-	Unter Windows:
-
-	```powershell
-	python dev_setup.py
-	```
-
-Das Skript erstellt den Ordner `.venv` und installiert dort die benötigten
-Pakete. 
-`.venv` ist eine virtuelle Umgebung: Die Pakete dieses Projekts bleiben
-dadurch von anderen Python-Projekten getrennt.
-
-### Virtuelle Umgebung aktivieren
-
-In den meisten fällen sollte die Umgebung automatisch aktiviert sein.
-Erkennbar ist das an dem (.venv) am anfang der Befehlszeile.
-
-Linux und macOS:
-
-```bash
-source .venv/bin/activate
-```
-
-Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-Wenn die Umgebung aktiviert ist, erscheint oft `(.venv)` am Anfang der
-Terminalzeile.
-
-## Anwendung starten
-
-Die Befehle müssen im Hauptordner des Projekts ausgeführt werden.
-
-Als Desktop-Anwendung:
-
-```bash
-flet run
-```
-
-Als Web-Anwendung im Browser:
-
-```bash
-flet run --web
-```
+1. [Verwendung](#die-anwendung-benutzen)
+   - [Anwendung herunterladen](#anwendung-herunterladen)
+   - [Kurze Anleitung](#kurze-anleitung)
+2. [Entwicklungsumgebung](#entwicklungsumgebung)
+   - [Umgebung erstellen](#umgebung-erstellen)
+   - [Anwendung starten](#anwendung-starten)
+   - [Datenbank zurücksetzen](#datenbank-zurücksetzen)
+   - [App kompilieren](#app-kompilieren)
+3. [Verwendung von KI](#verwendung-von-ki)
+4. [ER Diagramm](#erdiagramm)
+5. [Programmablauf](#programmablauf)
+   - [Gerät anlegen](#gerät-anlegen)
+   - [Typen und Mitarbeiter verwalten](#typen-und-mitarbeiter-verwalten)
+   - [Backup und Wiederherstellung](#backup-und-wiederherstellung)
+6. [Dokumentation](#link-zur-Dokumentation)
 
 ## Die Anwendung benutzen
+
+### Anwendung herunterladen
+
+https://github.com/EnteSuesssauer15/Codename-Winton-Thunder/releases
+
+### Kurze Anleitung
 
 - Beim ersten Start gibt es drei Beispieltypen, aber noch keine Mitarbeiter oder Geräte.
 - Lege zuerst unter `Employees` einen Mitarbeiter und unter `Types` einen Typ mit Kürzel an.
@@ -100,32 +63,38 @@ flet run --web
     └── test_main.py             Flet-Beispieltest, noch kein Inventartest
 ```
 
-### Wie fließt eine Aktion durch das Programm?
+## Entwicklungsumgebung
 
-1. `flet run` verwendet wegen der Einstellung in `pyproject.toml` den Ordner
-	`src` und startet `main.py`.
-2. `main.py` erstellt den `DatabaseManager` aus `scripts/database.py` und prüft, ob `database.db`
-	existiert.
-3. Fehlt die Datei, erstellt `database.py` die Tabellen `inventory`, `types`, `employees` und
-	`settings`.
-4. `devices.py` liest die Daten aus `inventory` und baut daraus die sichtbare
-	Tabelle. Selbes vorgehen ist auch bei `type.py` und `employee.py` aus den
-	Tabellen `devicetypes` und `employees`.
-5. Beim erstellen eines `Typen`, `Employee` oder `Device` wird jeweils ihre eigene Funktion verwendet.
-	Jede Funktion führt jeweils einen SQL Befehl auf die dementsprechende Tabelle aus mit mitgegebenen werten aus variablen.
+### Umgebung erstellen
 
-## Eine kleine Änderung machen
+1. Öffne ein Terminal im Hauptordner des Projekts. Das ist der Ordner, in dem
+	`README.md` und `dev_setup.py` liegen.
+2. Führe das Einrichtungs-Skript aus:
 
-Für eine Änderung an der Anwendung ist es übersichtlich gestaltet.
+	```bash
+	python3 dev_setup.py
+	```
 
-Beispielsweise ist man unzufrieden wie Geräte dargestellt werden, ändert man den code in der `devices.py`.
+Das Skript erstellt den Ordner `.venv` und installiert dort die benötigten
+Pakete. 
 
-Nach einer Änderung:
+### Anwendung starten
 
-Anwendung beenden und mit `flet run` neu starten.
+Die Befehle müssen im Hauptordner des Projekts ausgeführt werden.
 
+Als Desktop-Anwendung:
 
-## Datenbank zurücksetzen
+```bash
+flet run
+```
+
+Als Web-Anwendung im Browser:
+
+```bash
+flet run --web
+```
+
+### Datenbank zurücksetzen
 
 Wenn du für einen frischen Test alle Inventardaten löschen möchtest, beende
 die Anwendung und entferne `database.db`. Beim nächsten Start wird die Datei
@@ -143,7 +112,7 @@ Windows PowerShell:
 Remove-Item .flet\storage\data\database.db
 ```
 
-## App bauen
+## App kompilieren
 
 Die folgenden Befehle erzeugen ein Paket für die jeweilige Plattform. Für
 mobile Plattformen können zusätzliche SDKs und Signatur-Schlüssel notwendig
@@ -205,7 +174,7 @@ erDiagram
 
 `SETTINGS` wird beim Erstellen der Datenbank angelegt. Die Backup-Funktionen exportieren/importieren diese Tabelle derzeit nicht.
 
-## Programm Ablauf
+## Programmablauf
 
 ### Gerät anlegen
 
@@ -236,7 +205,7 @@ flowchart LR
     E -- Nein --> G["Datenbank ändern und Tabelle aktualisieren"]
 ```
 
-### JSON-Backup und Wiederherstellung
+### Backup und Wiederherstellung
 
 ```mermaid
 flowchart TD
