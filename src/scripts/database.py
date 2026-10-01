@@ -13,6 +13,12 @@ class DatabaseManager:
         #? Prüfen ob eine "database.db" Datei vorhanden ist
         return os.path.exists(self.db_name)
 
+    #? Schließt die Verbindung zur Datenbank, wenn sie geöffnet ist
+    def close(self):
+        if self.connection:
+            self.connection.close()
+            self.connection = None
+            self.cursor = None
 
     #? Funktion um die Datenbank zu generieren und einzurichten
     def initialize_database(self):

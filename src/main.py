@@ -1,5 +1,7 @@
 # main.py
 import flet as ft
+import os
+import sys
 
 from views.dashboard import DashboardView
 from views.settings import SettingsView
@@ -18,10 +20,32 @@ db_manager = DatabaseManager(DB_PATH)
 
 
 def main(page: ft.Page):
-    # `page` ist das Hauptfenster bzw. die Browser-Seite von Flet. Alles, was
-    # der Benutzer sieht, wird später an diese Seite angehängt.
     page.title = "KeepIt"
     page.padding = 0
+
+    content_area = None
+
+    #? Kleine die das Fenster schließt
+    async def quit_app():
+        await page.window.destroy()
+
+    #? Löscht die Datenbank und schließt die Anwendung
+    async def delete_database_and_quit():
+        db_manager.close()
+        os.remove(str(os.path.abspath(db_manager.db_name)))
+        await quit_app()
+
+    #? erzeugt ein Pop-Up Fenster, dass die Anwendung schließt
+    #? Nur verwendet bei kritischen fehlern, die die Anwendung nicht mehr starten lassen.
+    def alert_popup(title, message, actions=None):
+        dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(title),
+            content=ft.Text(message),
+            actions=actions or [ft.TextButton("Delete Database and Quit", on_click=delete_database_and_quit), ft.TextButton("Quit", on_click=quit_app)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.show_dialog(dialog)
 
     #? Die Anwendung benötigt ihre Tabellen, bevor eine View Daten lesen kann.
     #? Wenn die Datei noch fehlt, legt DatabaseManager sie mit den Tabellen
@@ -29,13 +53,24 @@ def main(page: ft.Page):
     if not db_manager.exists():
         db_manager.initialize_database()
         db_manager.execute("PRAGMA foreign_keys = ON;")
+    else:
+        db_manager.execute("PRAGMA foreign_keys = ON;")
 
     #* Jede View liefert zwei Dinge zurück:
     #* - den Container, der später im Inhaltsbereich angezeigt wird
     #* - eine Funktion, mit der die Tabelle neu aus der Datenbank gelesen wird
-    device_container, refresh_devices = DeviceView(page, db_manager)
-    type_container, refresh_types = TypeView(page, db_manager)
-    employee_container, refresh_employees = EmployeeView(page, db_manager)
+    
+    #* werden die views nicht korrekt geladen, wird ein Pop-Up angezeigt und die Anwendung beendet.
+    try:
+        device_container, refresh_devices = DeviceView(page, db_manager)
+        type_container, refresh_types = TypeView(page, db_manager)
+        employee_container, refresh_employees = EmployeeView(page, db_manager)
+
+        #? `content_area` ist ein Platzhalter für die aktuell ausgewählte Seite.
+        content_area = ft.Container(content=DashboardView(page, db_manager), expand=True)
+    except Exception as ex:
+        #? Wenn die Datenbank nicht initialisiert wurde oder nicht gelesen werden konnte, wird ein Popup angezeigt und die Anwendung beendet.
+        alert_popup("Database couldn't be read correctly", "Please check the database and restart the application." + "\n\nError:\n" + str(ex) + "\n\nDatabase Path:\n" + str(os.path.abspath(db_manager.db_name)))
 
     #? Icon in der Seitenleiste
     keepit_icon = ft.Image(
@@ -55,10 +90,6 @@ def main(page: ft.Page):
             page.keepit_icon.src = "white-keepup-icon.svg"
         else:
             page.keepit_icon.src = "black-keepup-icon.svg"
-
-
-    #? `content_area` ist ein Platzhalter für die aktuell ausgewählte Seite.
-    content_area = ft.Container(content=DashboardView(page, db_manager), expand=True)
 
     #? Dieser Handler tauscht die Seite aus, sobald sich die Auswahl der Navigation ändert. Der Index 0 steht für Home, Index 1 für Devices.
     def on_nav_change(e):
