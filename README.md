@@ -70,50 +70,34 @@ flet run --web
 
 ## Die Anwendung benutzen
 
-- Beim ersten Start ist die Datenbank völlig leer, ausgenommen von 3 Beispieltypen.
----
-- Um Geräte anlegen zu können, muss zuerst einen Mitarbeiter und ein Typ definiert werden.
-- Der Mitarbeiter wird in der `Employees` Ansicht erstellt.
-- Dort sowie auf den folgenden Ansichten befindet sich oben rechts ein Knopf mit dem sich ein Popup öffnet, in dem Der Name, Nachname und die Abteilung gefragt wird.
-- Drückt man dann auf Speichern hat man seinen ersten Mitarbeiter im System.
----
-- Als nächstes wird ein Typ in der `Types` Ansicht erstellt.
-- Typen agieren als eine art Kategorie, hierzu legt man den Kategorienamen fest und auch den Prefix der später in der Inventarnummer stehen wird.
-- Auch hier sieht man nach dem speichern seinen ersten Typ in der Tabelle.
----
-- Nun wird das erste Gerät in der `Devices` Ansicht erstellt.
-- Die Erstellung von Geräten ist Besonders einfach gestaltet. Zuerst wird nach der Gerätebezeichnung gefragt, Könnte Marke Modell oder auch Seriennummer enthalten - Freie entscheidung.
-- Da gerade schon ein Mitarbeiter und ein Typ erstellt wurde, wird hier nur noch per Dropdown jeweiliges ausgewählt.
-- Ist das Gerät gespeichert sieht man in der Tabelle die Inventarnummer, Marke Modell oder Seriennummer sowie den Typ, die Eindeutige ID eines Mitarbeiters als auch den Namen und Nachnamen.
----
-- Wenn man jetzt in die Home Ansicht sich das Dashboard anschaut sieht man, dass alles was man gerade angelegt hat auch dort gezählt wird.
+- Beim ersten Start gibt es drei Beispieltypen, aber noch keine Mitarbeiter oder Geräte.
+- Lege zuerst unter `Employees` einen Mitarbeiter und unter `Types` einen Typ mit Kürzel an.
+- Unter `Devices` kannst du ein Gerät erfassen und Typ sowie Mitarbeiter auswählen. Die Inventarnummer wird automatisch erstellt.
+- Das Dashboard zeigt die Anzahl der Geräte, Mitarbeiter und Typen.
+- Unter `Settings` kannst du Geräte, Typen und Mitarbeiter als JSON sichern oder daraus wiederherstellen. Beim Import werden diese Daten ersetzt. „Save Settings“ speichert derzeit keine Einstellungen.
 
-- Möchte man sein System extern Speichern als Backup beispielsweise kann man auf dem Zahnrad in der Seitenleiste die Einstellungsansicht öffnen.
-- Dort werden Alle werte aus der Datenbank als Json exportiert und auch wieder importiert. 
-- Beim Import werden sämtliche Daten die zu dem Zeitpunkt in der Datenbank stehen überschrieben, sodass die Daten aus der Json absolut sind.
-
-- Außerdem hat man die Funktion die Einstellungen zu speichern, jedoch gibts keine einstellungen...man kann diese aber speichern in der Datenbank, da die logik implementiert ist.
-
-## Wo liegt welcher Code?
+## Projektdateien
 
 ```text
 .
-├── README.md              Diese Anleitung
-├── dev_setup.py           Erstellt .venv und installiert Pakete
-├── pyproject.toml         (Automatisch erstellt) Projektname, Abhängigkeiten und Flet-Konfiguration
-├── requirements.txt       Benötigte Python-Pakete
+├── README.md                    Projektbeschreibung und Anleitung
+├── PROJECT_FLOW.md              Ablaufdiagramme und Projektübersicht
+├── dev_setup.py                 Erstellt .venv und installiert Pakete
+├── pyproject.toml               Projekt- und Flet-Konfiguration
+├── requirements.txt             Benötigte Python-Pakete
 ├── src/
-│   ├── main.py            Startpunkt und Navigation der Anwendung
+│   ├── main.py                  Start, Datenbankinitialisierung und Navigation
 │   ├── scripts/
-│   │   └── database.py    Zugriff auf die SQLite-Datenbank
+│   │   └── database.py          SQLite-Schema, Abfragen und Datenbankfunktionen
 │   ├── views/
-│   │   ├── dashboard.py   Dashboard-Seite
-│   │   ├── devices.py     Geräte-Seite
-|   |   ├── type.py        Gerätetypen-Seite
-|   |   ├── employee.py    Mitarbeiter-Seite
-│   │   ├── settings.py    Einstellungen-Seite
-│   └── assets/            Bilder und Logos
-└── tests/                 (Automatisch erstellt) Automatisierte Tests
+│   │   ├── dashboard.py         Kennzahlen und Geräteverteilung nach Typ
+│   │   ├── device.py            Inventarliste, Suche und Geräteverwaltung
+│   │   ├── employee.py          Mitarbeiterverwaltung
+│   │   ├── settings.py          JSON-Backup und -Restore
+│   │   └── type.py              Gerätetypenverwaltung
+│   └── assets/                  Logos, Icons und Splash-Grafik
+└── tests/
+    └── test_main.py             Flet-Beispieltest, noch kein Inventartest
 ```
 
 ### Wie fließt eine Aktion durch das Programm?
@@ -193,11 +177,84 @@ In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschr
 
 ## ER Diagramm
 
-[Excalidraw](https://excalidraw.com/#room=0e5fddbb5bf03e019d6b,Rz1cnnvJuAKWnrCQ02-RFA)
+```mermaid
+erDiagram
+    EMPLOYEES ||--o{ INVENTORY : "ist zugewiesen"
+    DEVICETYPES ||--o{ INVENTORY : "klassifiziert"
+    EMPLOYEES {
+        INTEGER employeeId PK
+        TEXT Name
+        TEXT Surname
+        TEXT Department
+    }
+    DEVICETYPES {
+        TEXT TypeId PK
+        TEXT Short
+    }
+    INVENTORY {
+        TEXT InventarNr PK
+        TEXT Device
+        TEXT Type_Id FK
+        INTEGER Assignee_Id FK
+    }
+    SETTINGS {
+        TEXT option PK
+        TEXT value
+    }
+```
+
+`SETTINGS` wird beim Erstellen der Datenbank angelegt. Die Backup-Funktionen exportieren/importieren diese Tabelle derzeit nicht.
 
 ## Programm Ablauf
 
-[Excalidraw](https://excalidraw.com/#room=72d51e287efb5137f5da,1CbI4XAkwgdmZ-BM5AprtQ)
+### Gerät anlegen
+
+```mermaid
+flowchart TD
+    A["Devices öffnen"] --> B["Typen und Mitarbeiter laden"]
+    B --> C["Add Device: Name, Typ und Mitarbeiter auswählen"]
+    C --> D{"Pflichtfelder gültig und Typ vorhanden?"}
+    D -- Nein --> E["Validierungsfehler anzeigen"]
+    D -- Ja --> F["Kürzel des Typs lesen"]
+    F --> G["Nächste fünfstellige Nummer für das Kürzel bestimmen"]
+    G --> H["InventarNr = Kürzel + Nummer"]
+    H --> I["inventory-Datensatz speichern"]
+    I --> J["Gerätetabelle aktualisieren"]
+```
+
+Beim Anzeigen der Geräteliste verbindet die App `inventory` mit `employees`, damit Name und Nachname des zugewiesenen Mitarbeiters erscheinen. Die Suche berücksichtigt Inventarnummer, Gerät, Typ, Mitarbeiter-ID und Namen.
+
+### Typen und Mitarbeiter verwalten
+
+```mermaid
+flowchart LR
+    A["Types oder Employees öffnen"] --> B["Datensätze aus SQLite laden"]
+    B --> C["Suchen / neuen Datensatz anlegen / Zeilen auswählen"]
+    C --> D["Speichern oder ausgewählte Datensätze löschen"]
+    D --> E{"Wird ein Typ oder Mitarbeiter noch verwendet?"}
+    E -- Ja --> F["Fremdschlüssel verhindert Löschen; Fehlerdialog"]
+    E -- Nein --> G["Datenbank ändern und Tabelle aktualisieren"]
+```
+
+### JSON-Backup und Wiederherstellung
+
+```mermaid
+flowchart TD
+    A["Settings öffnen"] --> B{"Aktion"}
+    B -- Export --> C["inventory, devicetypes und employees lesen"]
+    C --> D["Als backup.json speichern"]
+    B -- Import --> E["JSON-Datei auswählen und lesen"]
+    E --> F["Pflichtfelder und Gerätebeziehungen prüfen"]
+    F --> G{"Backup gültig?"}
+    G -- Nein --> H["Fehler protokollieren; Import abbrechen"]
+    G -- Ja --> I["Ersetzen bestätigen lassen"]
+    I --> J{"Bestätigt?"}
+    J -- Nein --> K["Import abbrechen"]
+    J -- Ja --> L["Bisherige Geräte, Mitarbeiter und Typen löschen"]
+    L --> M["Typen und Mitarbeiter einfügen"]
+    M --> N["Alte auf neue Mitarbeiter-IDs abbilden"]
+    N --> O["Geräte mit aktualisierten Mitarbeiter-IDs einfügen"]
+```
 
 ## Link zur Dokumentation
 
