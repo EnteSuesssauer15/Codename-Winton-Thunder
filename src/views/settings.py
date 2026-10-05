@@ -144,6 +144,7 @@ def restore_all(data):
 
 def SettingsView():
     async def handle_backup(e):
+        page = e.page
         #? Öffnet die Abfrage, wo die Datei gespeichert werden soll
         save_path = await ft.FilePicker().save_file(
             dialog_title="Save backup file",
@@ -160,9 +161,9 @@ def SettingsView():
 
         try:
             make_backup(save_path)
-            print("Backup saved to:", save_path)
+            page.show_dialog(ft.SnackBar(ft.Text("Backup completed successfully.")))
         except Exception as error:
-            print("Backup failed:", error)
+            page.show_dialog(ft.SnackBar(ft.Text("Backup failed." + str(error))))
 
     async def handle_restore(e):
         page = e.page
@@ -184,7 +185,7 @@ def SettingsView():
                 data = json.load(file)
             check_backup(data)
         except Exception as error:
-            print("Could not read backup:", error)
+            page.show_dialog(ft.SnackBar(ft.Text("Could not read backup." + str(error))))
             return
 
         def cancel(event):
@@ -194,9 +195,9 @@ def SettingsView():
             page.pop_dialog()
             try:
                 restore_all(data)
-                print("Restore finished.")
+                page.show_dialog(ft.SnackBar(ft.Text("Restore completed successfully.")))
             except Exception as error:
-                print("Restore failed:", error)
+                page.show_dialog(ft.SnackBar(ft.Text("Restore failed. " + str(error))))
 
         #? Zeigt ein Popupfenster welches die änderungen bzw daten anzeigt die importiert werden
         page.show_dialog(

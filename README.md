@@ -162,14 +162,10 @@ Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/)
 
 ## Verwendung von KI
 
-KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie sowas programmiert wird es aber selbst implementiert.
-Ebenfalls wurden teilweise kommentare von KI geschrieben.
+KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie mit der GUI programmiert wird es aber selbst implementiert.
+Im grunde hat die KI mir geholfen zu verstehen wie Die Bibliothek funktioniert, bei der im vergleich die offizielle Dokumentation mir nicht weitergeholfen hat.
 
-In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, sodass es verständlicher wird.
-
-## Anforderungen
-
-[Excalidraw](https://excalidraw.com/#room=8af59903bd29f5051c35,2fg6w04Sic9SkeJsk8R1cA)
+In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, aufgrund der komplexität des Importierens und Exportierens samt öffnen einer Dateiauswahl ging das auf dem weg wesentlich schneller und möglicherweise auch übersichtlicher als selbst geschrieben.
 
 ## UI-Entwurf
 
@@ -259,3 +255,39 @@ flowchart TD
 ## Link zur Dokumentation
 
 [KeepIt Dokumentation](https://docs.google.com/document/d/1DGke-Ds1Lg0tazXipkGuDV4cOVIw2nPy0Qg5TGpkDDk/edit?usp=sharing)
+
+
+
+# Zur Abgabe benötigt
+
+# A · Entwicklungsdokumentation
+## Projektdokumentation:
+### Anforderungen
+
+- Übersichtliche und einleuchtende Darstellung sowie bedienung
+- Eindeutige Inventarnummer mit Kürzel jenachdem welches Gerät inventarisiert wird
+- Suchfunktion
+- Import/Export der Daten
+
+### Aufgabenverteilung
+
+## Systemdokumentation:
+### Grundlagen
+### Entwurf (Datenmodell/ER, Programmstruktur)
+### Begründungen
+### Code-Erläuterung
+
+## Testdokumentation:
+### Testfälle 
+### Testprotokoll (nach 3.8/5.9)
+### Abnahmeprotokoll
+### Fazit
+## KI-Interaktionsprotokoll:
+
+### wofür KI genutzt wurde, was ihr selbst verändert habt
+
+## Reflexion: Was war schwierig, was würdet ihr heute anders machen?
+
+# B · Benutzerdokumentation:
+## Installationsanleitung: Voraussetzungen, Start des Tools
+## Bedienungsanleitung: Funktionen, Beispielablauf, Verhalten bei Fehlern

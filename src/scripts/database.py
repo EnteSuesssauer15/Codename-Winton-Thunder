@@ -76,7 +76,6 @@ class DatabaseManager:
             self.cursor = self.connection.cursor()
         self.cursor.execute(command)
         self.connection.commit()
-        print("Command executed successfully.")
 
 
     #? Um Einstellungen zu speichern
@@ -155,7 +154,6 @@ class DatabaseManager:
     
     #? Diese Methode führt eine SELECT-Abfrage aus und gibt sowohl die Spaltennamen als auch alle gefundenen Zeilen zurück.
     def fetch_query(self, query):
-        
         if not self.connection:
             self.connection = sql3.connect(self.db_name, check_same_thread=False)
             self.cursor = self.connection.cursor()
@@ -163,54 +161,88 @@ class DatabaseManager:
         column_names = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
         return column_names, rows
-    
-    #? Durchsucht die Inventar Tabelle in der entweder InventarNr, Gerät, Typ, MitarbeiterID, Name oder Nachname Gesucht wird
-    #? Der suchbegriff wird durch den Parameter query mitgegeben und als "search_pattern" gespeichert
-    def search_inventory(self, query):
 
+
+ #! von KI unterstützt
+    #! Suche umgebaut, sodass die Begriffe in keiner Reihenfolge sein müssen und die Suche nicht case sensitive ist. Außerdem werden Leerzeichen ignoriert.
+    #? Durchsucht die Inventory Tabelle in der entweder InventarNr, Gerät, Typ oder Mitarbeiter gesucht werden können
+    def search_inventory(self, query):
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        #? Fügt % an anfang und ende, sodass es als wildcard verwendet wird
-        search_pattern = f"%{query}%"
+
+        #? Teilt die Eingabe an Leerzeichen auf und fügt alle suchbegriffe in einen array, in Kleinbuchstaben, ohne Leerzeichen.
+        search_terms = ["".join(term.casefold().split()) for term in query.split()]
+
+        #? Liest gesammte inventory tabelle aus
         self.cursor.execute("""SELECT inventory.InventarNr, inventory.Device, inventory.Type_Id, inventory.Assignee_Id, employees.Name, employees.Surname FROM inventory
-               JOIN employees ON employees.employeeId = inventory.Assignee_Id WHERE inventory.InventarNr || inventory.Device || inventory.Type_Id || inventory.Assignee_Id || employees.Name || employees.Surname LIKE ?""",(search_pattern,),)
-        #? Für jede Spalte die gelistet wird gibts einen array eintrag
+               JOIN employees ON employees.employeeId = inventory.Assignee_Id""")
         column_names = [desc[0] for desc in self.cursor.description]
-        #? "rows" steht hier für jede Reihe die gelistet wird
         rows = self.cursor.fetchall()
-        #? beide Werte werden zurückgegeben als wert für denjenigen der sie Funktion aufgerufen hat.
-        return column_names, rows
+        matching_rows = []
+
+        for row in rows:
+            #? Speichert die Zeile als einen einzigen String, der alle Spaltenwerte enthält, in Kleinbuchstaben und ohne Leerzeichen.
+            row_text = "".join("".join(str(value).casefold().split()) for value in row)
+
+            #? Wenn alle Suchbegriffe in der Zeile vorkommen, wird die Zeile zu den passenden Zeilen hinzugefügt.
+            if all(term in row_text for term in search_terms):
+                matching_rows.append(row)
+
+        #? Gibt die Spaltennamen und nur die passenden Gerätezeilen zurück.
+        return column_names, matching_rows
     
     #? Durchsucht die Type Tabelle in der entweder Typen oder Kürzel gesucht werden können
     def search_type(self, query):
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        #? Fügt % an anfang und ende, sodass es als wildcard verwendet wird
-        search_pattern = f"%{query}%"
-        self.cursor.execute("""SELECT TypeId, Short FROM devicetypes WHERE TypeId || Short LIKE ?""",(search_pattern,),)
-        #? Für jede Spalte die gelistet wird gibts einen array eintrag
+
+        #? Teilt die Eingabe an Leerzeichen auf und fügt alle suchbegriffe in einen array, in Kleinbuchstaben, ohne Leerzeichen.
+        search_terms = ["".join(term.casefold().split()) for term in query.split()]
+
+        #? Liest gesammte inventory tabelle aus
+        self.cursor.execute("""SELECT TypeId, Short FROM devicetypes""")
         column_names = [desc[0] for desc in self.cursor.description]
-        #? "rows" steht hier für jede Reihe die gelistet wird
         rows = self.cursor.fetchall()
-        #? beide Werte werden zurückgegeben als wert für denjenigen der sie Funktion aufgerufen hat.
-        return column_names, rows
+        matching_rows = []
+
+        for row in rows:
+            #? Speichert die Zeile als einen einzigen String, der alle Spaltenwerte enthält, in Kleinbuchstaben und ohne Leerzeichen.
+            row_text = "".join("".join(str(value).casefold().split()) for value in row)
+
+            #? Wenn alle Suchbegriffe in der Zeile vorkommen, wird die Zeile zu den passenden Zeilen hinzugefügt.
+            if all(term in row_text for term in search_terms):
+                matching_rows.append(row)
+
+        #? Gibt die Spaltennamen und nur die passenden Gerätezeilen zurück.
+        return column_names, matching_rows
 
     #? Durchsucht die Type Tabelle in der entweder ID, Name, Nachname oder Abteilung gesucht werden können
     def search_employee(self, query):
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        #? Fügt % an anfang und ende, sodass es als wildcard verwendet wird
-        search_pattern = f"%{query}%"
-        self.cursor.execute("""SELECT employeeId, Name, Surname, Department FROM employees WHERE employeeId || Name || Surname || Department LIKE ?""",(search_pattern,),)
-        #? Für jede Spalte die gelistet wird gibts einen array eintrag
+
+        #? Teilt die Eingabe an Leerzeichen auf und fügt alle suchbegriffe in einen array, in Kleinbuchstaben, ohne Leerzeichen.
+        search_terms = ["".join(term.casefold().split()) for term in query.split()]
+
+        #? Liest gesammte inventory tabelle aus
+        self.cursor.execute("""SELECT employeeId, Name, Surname, Department FROM employees""")
         column_names = [desc[0] for desc in self.cursor.description]
-        #? "rows" steht hier für jede Reihe die gelistet wird
         rows = self.cursor.fetchall()
-        #? beide Werte werden zurückgegeben als wert für denjenigen der sie Funktion aufgerufen hat.
-        return column_names, rows
+        matching_rows = []
+
+        for row in rows:
+            #? Speichert die Zeile als einen einzigen String, der alle Spaltenwerte enthält, in Kleinbuchstaben und ohne Leerzeichen.
+            row_text = "".join("".join(str(value).casefold().split()) for value in row)
+
+            #? Wenn alle Suchbegriffe in der Zeile vorkommen, wird die Zeile zu den passenden Zeilen hinzugefügt.
+            if all(term in row_text for term in search_terms):
+                matching_rows.append(row)
+
+        #? Gibt die Spaltennamen und nur die passenden Gerätezeilen zurück.
+        return column_names, matching_rows
 
     #! Unterstützt durch KI
     #? Nächste nummer für die InventarNr  
