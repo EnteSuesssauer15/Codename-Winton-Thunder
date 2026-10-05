@@ -228,6 +228,38 @@ flowchart TD
 
 [KeepIt Dokumentation](https://docs.google.com/document/d/1DGke-Ds1Lg0tazXipkGuDV4cOVIw2nPy0Qg5TGpkDDk/edit?usp=sharing)
 
-## Reflexion
 
 
+# Zur Abgabe benötigt
+
+# A · Entwicklungsdokumentation
+## Projektdokumentation:
+### Anforderungen
+
+- Übersichtliche und einleuchtende Darstellung sowie bedienung
+- Eindeutige Inventarnummer mit Kürzel jenachdem welches Gerät inventarisiert wird
+- Suchfunktion
+- Import/Export der Daten
+
+### Aufgabenverteilung
+
+## Systemdokumentation:
+### Grundlagen
+### Entwurf (Datenmodell/ER, Programmstruktur)
+### Begründungen
+### Code-Erläuterung
+
+## Testdokumentation:
+### Testfälle 
+### Testprotokoll (nach 3.8/5.9)
+### Abnahmeprotokoll
+### Fazit
+## KI-Interaktionsprotokoll:
+
+### wofür KI genutzt wurde, was ihr selbst verändert habt
+
+## Reflexion: Was war schwierig, was würdet ihr heute anders machen?
+
+# B · Benutzerdokumentation:
+## Installationsanleitung: Voraussetzungen, Start des Tools
+## Bedienungsanleitung: Funktionen, Beispielablauf, Verhalten bei Fehlern
