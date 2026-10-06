@@ -1,10 +1,15 @@
-# Diese Datei beschreibt den Inhalt der Home-Seite.
+# dashboard.py
+# Diese Datei beschreibt den Inhalt der Home-Seite (Dashboard).
+# Sie zeigt Kennzahlen (Anzahl Geräte, Mitarbeiter, Typen) und wie viele
+# Geräte es pro Typ gibt.
+#
+# Diese Datei wurde hauptsächlich von KI generiert.
 import flet as ft
 
-#! Hauptsächlich von KI Generiert worden
 
 def make_stat_card(title, value, icon):
-    #? Erstellt jeweils eine Karte mit Icon und Text
+    # Erstellt eine Karte mit Icon, großer Zahl und Beschriftung darunter,
+    # z. B. Icon + "12" + "Total devices".
     return ft.Container(
         content=ft.Column(
             [
@@ -22,7 +27,11 @@ def make_stat_card(title, value, icon):
 
 
 def make_type_row(type_name, count, total):
-    #? Prefab die mit daten gerufen wird und somit die Übersicht für Geräte pro Typ erstellt
+    # Baustein (Vorlage), der mit Daten aufgerufen wird und eine Zeile der
+    # Übersicht "Geräte pro Typ" erstellt: Typname, Fortschrittsbalken, Anzahl.
+    # `share` ist der Anteil dieses Typs an allen Geräten (Wert zwischen 0 und 1)
+    # und bestimmt, wie weit der Balken gefüllt ist.
+    # Die Prüfung auf `total > 0` verhindert eine Division durch null.
     if total > 0:
         share = count / total
     else:
@@ -39,7 +48,9 @@ def make_type_row(type_name, count, total):
 
 
 def DashboardView(page: ft.Page, db_manager):
-    #? Anzahl aus den 3 Tabellen anfordern
+    # Fragt die Anzahl der Einträge aus den drei Tabellen ab.
+    # `COUNT(*)` liefert genau eine Zeile mit einer Spalte, deshalb steht
+    # die Zahl in rows[0][0] (erste Zeile, erste Spalte).
     columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM inventory")
     device_count = rows[0][0]
 
@@ -49,12 +60,14 @@ def DashboardView(page: ft.Page, db_manager):
     columns, rows = db_manager.fetch_query("SELECT COUNT(*) FROM devicetypes")
     type_count = rows[0][0]
 
-    #? Anzahl für Geräte pro Typ
+    # Anzahl der Geräte pro Typ. `GROUP BY` fasst alle Geräte mit gleichem Typ
+    # zusammen, sodass jede Zeile so aussieht: ("Computer", 5).
     columns, type_rows = db_manager.fetch_query(
         "SELECT Type_Id, COUNT(*) FROM inventory GROUP BY Type_Id"
     )
 
-    #? Erstellt die "Tabelle" für die Anzahl der Geräten pro Typ
+    # Erstellt die "Tabelle" mit der Anzahl der Geräte pro Typ.
+    # Gibt es noch keine Geräte, wird stattdessen ein Hinweistext angezeigt.
     type_section = ft.Column(spacing=15)
     if len(type_rows) == 0:
         type_section.controls.append(ft.Text("No devices yet."))
@@ -64,7 +77,8 @@ def DashboardView(page: ft.Page, db_manager):
                 make_type_row(row[0], row[1], device_count)
             )
 
-    #? Zusammenbau der Ansicht
+    # Zusammenbau der Ansicht: Überschrift, eine Reihe mit den drei Karten
+    # und darunter der Bereich "Devices per type".
     return ft.Container(
         content=ft.Column(
             [
@@ -75,6 +89,7 @@ def DashboardView(page: ft.Page, db_manager):
                         make_stat_card("Employees", employee_count, ft.Icons.PEOPLE),
                         make_stat_card("Device types", type_count, ft.Icons.CATEGORY),
                     ],
+                    # `wrap=True`: Ist das Fenster zu schmal, rutschen die Karten in die nächste Zeile.
                     wrap=True,
                     spacing=20,
                 ),
@@ -92,6 +107,7 @@ def DashboardView(page: ft.Page, db_manager):
                 ),
             ],
             spacing=25,
+            # Zeigt automatisch eine Scrollleiste, wenn der Inhalt nicht ins Fenster passt.
             scroll=ft.ScrollMode.AUTO,
             expand=True,
         ),

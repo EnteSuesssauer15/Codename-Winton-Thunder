@@ -1,3 +1,7 @@
+# dev_setup.py
+# Richtet die Entwicklungsumgebung ein. Einmalig im Projektordner ausführen mit:
+#   python dev_setup.py
+# Danach liegen alle benötigten Pakete aus `requirements.txt` in `.venv`.
 import subprocess
 import venv
 import os

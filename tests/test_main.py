@@ -10,9 +10,9 @@ async def test_increment(flet_app: ftt.FletTestApp):
     """
     tester = flet_app.tester
 
+    # Warten, bis die erste Darstellung der App abgeschlossen ist.
     await tester.pump_and_settle()
 
-    # Warten, bis die erste Darstellung der App abgeschlossen ist.
     # Ausgangszustand des Beispielzählers.
     assert (await tester.find_by_text("0")).count == 1
 
