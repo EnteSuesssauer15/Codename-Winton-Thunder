@@ -9,9 +9,11 @@
 # - inventory:   Geräte (Inventarnummer, Name, Typ, zugewiesener Mitarbeiter)
 # - settings:    Einstellungen als Paare aus Option und Wert
 #
-# Hinweis: Die meisten Methoden setzen Werte mit `.format()` direkt in den
-# SQL-Text ein. Enthält ein Wert ein Hochkomma ('), schlägt der Befehl fehl.
-# Sicherer sind Platzhalter (`?`), wie sie in `get_next_highest_id()` verwendet werden.
+# Hinweis: Werte werden nie direkt in den SQL-Text geschrieben (z. B. mit
+# `.format()`), sondern über Platzhalter (`?`) übergeben. SQLite setzt die Werte
+# dann selbst sicher ein. So funktionieren auch Werte mit Hochkomma wie "O'Brien",
+# und niemand kann über ein Eingabefeld eigene SQL-Befehle einschleusen
+# (SQL-Injection).
 import os
 import pysqlite3 as sql3
 
@@ -103,20 +105,25 @@ class DatabaseManager:
 
     # Führt einen beliebigen SQL-Befehl aus, ohne ein Ergebnis zurückzugeben.
     # Geeignet für INSERT, UPDATE, DELETE oder PRAGMA.
-    def execute(self, command):
+    # command = SQL-Text, darin steht für jeden Wert ein `?` als Platzhalter
+    # params  = Tupel mit den Werten für die Platzhalter, in derselben Reihenfolge.
+    #           Ohne Platzhalter kann `params` weggelassen werden,
+    #           z. B. execute("PRAGMA foreign_keys = ON;").
+    def execute(self, command, params=()):
         # Falls noch keine Verbindung besteht, wird sie jetzt geöffnet.
         # Dieses Muster wiederholt sich in mehreren Methoden dieser Klasse.
         if not self.connection:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
-        self.cursor.execute(command)
+        self.cursor.execute(command, params)
         self.connection.commit()
 
 
     # Speichert eine Einstellung (z. B. setting="theme", value="dark").
     def settings_set(self, setting, value):
         # INSERT OR REPLACE legt eine Option an oder ersetzt ihren alten Wert.
-        self.execute("INSERT OR REPLACE INTO settings (option, value) VALUES ('{}', '{}')".format(setting, value))
+        # Die beiden `?` werden der Reihe nach mit `setting` und `value` gefüllt.
+        self.execute("INSERT OR REPLACE INTO settings (option, value) VALUES (?, ?)", (setting, value))
 
 
     # Liest den gespeicherten Wert einer Einstellung aus.
@@ -125,7 +132,9 @@ class DatabaseManager:
             self.connection = sql3.connect(self.db_name)
             self.cursor = self.connection.cursor()
         # SELECT liest genau den Wert der angeforderten Option.
-        self.cursor.execute("SELECT value FROM settings WHERE option = '{}'".format(setting))
+        # Auch bei nur einem Wert muss ein Tupel übergeben werden. Das Komma in
+        # `(setting,)` ist wichtig, ohne es wäre es kein Tupel.
+        self.cursor.execute("SELECT value FROM settings WHERE option = ?", (setting,))
         # `fetchone()` liefert die erste gefundene Zeile als Tupel, z. B. ("dark",),
         # oder None, wenn nichts gefunden wurde.
         result = self.cursor.fetchone()
@@ -139,16 +148,16 @@ class DatabaseManager:
     # type     = Typname aus der Tabelle devicetypes, z. B. "Computer"
     # location = ID des Mitarbeiters, dem das Gerät zugewiesen wird
     def device_create(self, id, device, type, location):
-        self.execute("INSERT INTO inventory (InventarNr, Device, Type_Id, Assignee_Id) VALUES ('{}', '{}', '{}', '{}')".format(id, device, type, location))
+        self.execute("INSERT INTO inventory (InventarNr, Device, Type_Id, Assignee_Id) VALUES (?, ?, ?, ?)", (id, device, type, location))
 
     # Löscht ein Gerät anhand seiner Inventarnummer.
     def device_delete(self, id):
-        self.execute("DELETE FROM inventory WHERE InventarNr = '{}'".format(id))
+        self.execute("DELETE FROM inventory WHERE InventarNr = ?", (id,))
 
     # Legt einen neuen Mitarbeiter an. Die ID wird von der Datenbank
     # automatisch vergeben (AUTOINCREMENT) und muss nicht übergeben werden.
     def employee_create(self, Name, Surname, Department):
-        self.execute("INSERT INTO employees (Name, Surname, Department) VALUES ('{}', '{}', '{}')".format(Name, Surname, Department))
+        self.execute("INSERT INTO employees (Name, Surname, Department) VALUES (?, ?, ?)", (Name, Surname, Department))
 
     # Löscht einen Mitarbeiter anhand seiner ID.
     def employee_delete(self, id):
@@ -157,7 +166,7 @@ class DatabaseManager:
         # Dieser Fehler wird nicht weitergeworfen, sondern zurückgegeben, damit
         # die View eine Meldung anzeigen kann. Ohne Fehler wird None zurückgegeben.
         try:
-            self.execute("DELETE FROM employees WHERE EmployeeId = '{}'".format(id,))
+            self.execute("DELETE FROM employees WHERE EmployeeId = ?", (id,))
         except Exception as e:
             return e
 
@@ -177,14 +186,14 @@ class DatabaseManager:
 
     # Legt einen neuen Gerätetyp an, z. B. Type="Drucker", Short="DRU".
     def type_create(self, Type, Short):
-        self.execute("INSERT INTO devicetypes (TypeId, Short) VALUES ('{}', '{}')".format(Type, Short))
+        self.execute("INSERT INTO devicetypes (TypeId, Short) VALUES (?, ?)", (Type, Short))
 
     # Löscht einen Gerätetyp anhand seiner ID (des Typnamens).
     def type_delete(self, id):
         # Wird der Typ noch von einem Gerät verwendet, entsteht ein Fehler.
         # Wie bei `employee_delete()` wird der Fehler zurückgegeben statt geworfen.
         try:
-            self.execute("DELETE FROM devicetypes WHERE TypeId = '{}'".format(id,))
+            self.execute("DELETE FROM devicetypes WHERE TypeId = ?", (id,))
         except Exception as e:
             return e
 
