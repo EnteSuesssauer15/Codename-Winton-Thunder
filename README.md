@@ -17,15 +17,14 @@ gespeichert.
    - [Anwendung starten](#anwendung-starten)
    - [Datenbank zurücksetzen](#datenbank-zurücksetzen)
    - [App kompilieren](#app-kompilieren)
-3. [Verwendung von KI](#verwendung-von-ki)
-5. [Anforderungen an das Projekt](#anforderungen)
-6. [UI Entwurf](#ui-entwurf)
-7. [ER Diagramm](#er-diagramm)
-8. [Programmablauf](#programmablauf)
+3. [Anforderungen an das Projekt](#anforderungen)
+4. [UI Entwurf](#ui-entwurf)
+5. [ER Diagramm](#er-diagramm)
+6. [Programmablauf](#programmablauf)
    - [Gerät anlegen](#gerät-anlegen)
    - [Typen und Mitarbeiter verwalten](#typen-und-mitarbeiter-verwalten)
    - [Backup und Wiederherstellung](#backup-und-wiederherstellung)
-9. [Benötigt für die Abgabe](#zur-abgabe-benötigt)
+7. [Benötigt für die Abgabe](#zur-abgabe-benötigt)
    - [Entwicklungsdokumentation](#a--entwicklungsdokumentation)
      - [Projektdokumentation](projektdokumentation)
         - [Anforderungen](#anforderungen)
@@ -38,11 +37,11 @@ gespeichert.
       	- [Testprotokoll](#testprotokoll)
         - [Abnahmeprotokoll](#abnahmeprotokoll)
         - [Fazit](#fazit)
-        - [KI-Interaktionsporotkoll](#ki-interaktionsprotokoll)
+        - [Verwendung von KI](#verwendung-von-ki)
         - [Reflexion](#reflexion)
-     - [Benutzerdokumentation](#b--benutzerdokumentation)
-     	- [Installationsanleitung](#installationsanleitung)
-      	- [Bedienungsanleitung](äbedienungsanleitung)	
+   - [Benutzerdokumentation](#b--benutzerdokumentation)
+  		- [Installationsanleitung](#installationsanleitung)
+   		- [Bedienungsanleitung](äbedienungsanleitung)	
 
 ## Die Anwendung benutzen
 
@@ -148,13 +147,6 @@ flet build web -v      # Web
 
 Weitere Informationen stehen in der [Flet-Dokumentation](https://flet.dev/docs/).
 
-## Verwendung von KI
-
-KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie mit der GUI programmiert wird es aber selbst implementiert.
-Im grunde hat die KI mir geholfen zu verstehen wie Die Bibliothek funktioniert, bei der im vergleich die offizielle Dokumentation mir nicht weitergeholfen hat.
-
-In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, aufgrund der komplexität des Importierens und Exportierens samt öffnen einer Dateiauswahl ging das auf dem weg wesentlich schneller und möglicherweise auch übersichtlicher als selbst geschrieben.
-
 ## UI-Entwurf
 
 [Excalidraw](https://excalidraw.com/#room=076266f0ae80d05fa866,UH7-gWjAp0Z2MI0mYbicHw)
@@ -259,9 +251,19 @@ flowchart TD
 
 ### Aufgabenverteilung
 
+- Lars
+- Laura
+- Joshua
+- Nico -> Entwicklung
+
 ## Systemdokumentation
 ### Grundlagen
 ### Entwurf
+
+- [UI Layout](#ui-entwurf)
+- [ER Diagramm](#er-diagramm)
+- [Programmablauf](#programmablauf)
+
 ### Begründungen
 ### Code-Erläuterung
 
@@ -270,7 +272,12 @@ flowchart TD
 ### Testprotokoll
 ### Abnahmeprotokoll
 ### Fazit
-## KI-Interaktionsprotokoll
+## Verwendung von KI
+
+KI wurde meist als hilfestellung für syntax verwendet, sprich copilot autocomplete oder beispiele gegeben wie mit der GUI programmiert wird es aber selbst implementiert.
+Im grunde hat die KI mir geholfen zu verstehen wie Die Bibliothek funktioniert, bei der im vergleich die offizielle Dokumentation mir nicht weitergeholfen hat.
+
+In der `dashboard.py` und `settings.py` wurde fast ausschließlich von KI geschrieben und selbst kommentiert, aufgrund der komplexität des Importierens und Exportierens samt öffnen einer Dateiauswahl ging das auf dem weg wesentlich schneller und möglicherweise auch übersichtlicher als selbst geschrieben.
 
 wofür KI genutzt wurde, was ihr selbst verändert habt
 
