@@ -20,13 +20,29 @@ gespeichert.
 3. [Verwendung von KI](#verwendung-von-ki)
 5. [Anforderungen an das Projekt](#anforderungen)
 6. [UI Entwurf](#ui-entwurf)
-7. [ER Diagramm](#erdiagramm)
+7. [ER Diagramm](#er-diagramm)
 8. [Programmablauf](#programmablauf)
    - [Gerät anlegen](#gerät-anlegen)
    - [Typen und Mitarbeiter verwalten](#typen-und-mitarbeiter-verwalten)
    - [Backup und Wiederherstellung](#backup-und-wiederherstellung)
-9. [Dokumentation](#link-zur-Dokumentation)
-10. [Reflexion](#reflexion)
+9. [Benötigt für die Abgabe](#zur-abgabe-benötigt)
+   - [Entwicklungsdokumentation](#a--entwicklungsdokumentation)
+     - [Projektdokumentation](projektdokumentation)
+        - [Anforderungen](#anforderungen)
+        - [Aufgabenverteilung](#aufgabenverteilung)
+     - [Systemdokumentation](#systemdokumentation)
+     	- [Grundlagen](#grundlagen)
+      	- [Entwurf](#entwurf)
+     - [Testdokumentation](#testdokumentation)
+     	- [Testfälle](testfälle)
+      	- [Testprotokoll](#testprotokoll)
+        - [Abnahmeprotokoll](#abnahmeprotokoll)
+        - [Fazit](#fazit)
+        - [KI-Interaktionsporotkoll](#ki-interaktionsprotokoll)
+        - [Reflexion](#reflexion)
+     - [Benutzerdokumentation](#b--benutzerdokumentation)
+     	- [Installationsanleitung](#installationsanleitung)
+      	- [Bedienungsanleitung](äbedienungsanleitung)	
 
 ## Die Anwendung benutzen
 
@@ -233,7 +249,7 @@ flowchart TD
 # Zur Abgabe benötigt
 
 # A · Entwicklungsdokumentation
-## Projektdokumentation:
+## Projektdokumentation
 ### Anforderungen
 
 - Übersichtliche und einleuchtende Darstellung sowie bedienung
@@ -243,23 +259,26 @@ flowchart TD
 
 ### Aufgabenverteilung
 
-## Systemdokumentation:
+## Systemdokumentation
 ### Grundlagen
-### Entwurf (Datenmodell/ER, Programmstruktur)
+### Entwurf
 ### Begründungen
 ### Code-Erläuterung
 
-## Testdokumentation:
+## Testdokumentation
 ### Testfälle 
-### Testprotokoll (nach 3.8/5.9)
+### Testprotokoll
 ### Abnahmeprotokoll
 ### Fazit
-## KI-Interaktionsprotokoll:
+## KI-Interaktionsprotokoll
 
-### wofür KI genutzt wurde, was ihr selbst verändert habt
+wofür KI genutzt wurde, was ihr selbst verändert habt
 
-## Reflexion: Was war schwierig, was würdet ihr heute anders machen?
+## Reflexion
+Was war schwierig, was würdet ihr heute anders machen?
 
-# B · Benutzerdokumentation:
-## Installationsanleitung: Voraussetzungen, Start des Tools
-## Bedienungsanleitung: Funktionen, Beispielablauf, Verhalten bei Fehlern
+# B · Benutzerdokumentation
+## Installationsanleitung
+Voraussetzungen, Start des Tools
+## Bedienungsanleitung
+Funktionen, Beispielablauf, Verhalten bei Fehlern
