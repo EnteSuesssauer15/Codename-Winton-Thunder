@@ -6,7 +6,7 @@ import sys
 from views.dashboard import DashboardView
 from views.settings import SettingsView
 
-#* der Inhalt dieser 3 ähnelt sich start - man hätte einige funktionen zusammenlegen können, so aber verständlicher zu verstehen
+#* der Inhalt dieser 3 ähnelt sich stark - man hätte einige funktionen zusammenlegen können, so aber verständlicher zu verstehen
 from views.device import DeviceView
 from views.type import TypeView
 from views.employee import EmployeeView
