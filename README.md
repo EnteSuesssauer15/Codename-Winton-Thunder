@@ -268,8 +268,37 @@ flowchart TD
 ### Code-Erläuterung
 
 ## Testdokumentation
-### Testfälle 
+### Testfälle
+Folgende Testfälle wurden als Blackbox-Tests durchgeführt: 
+
+- Prüfung der Dauerhaften Speicherung der Daten in einer Datenbank
+- Anlegen eines neuen Mitarbeiters
+- Meldung bei leeren Pflichtfeldern
+- Suchfunktion testen
+- Gerät anlegen
+- Im Dropdown ungültigen freien Text eingeben
+- Auswählbare Optionen der Dropdowns aktualisieren sich mit neuen Einträgen
+- Backupfunktion testen
+
 ### Testprotokoll
+Datum: 19.10.2026 
+<br>
+Uhrzeit: 19:30
+<br>
+Tester: Laura Wolf
+| Beschreibung | Durchführung | Erwartetes Ergebnis | Ergebnis |
+|---|---|---|---|
+| Daten bleiben in der Datenbank bestehen | Daten anlegen, App neu starten | Daten sind weiterhin vorhanden | OK |
+| Mitarbeiter anlegen | Employees → Add, Name/Nachname/Abteilung ausfüllen, Save | Eintrag erscheint in der Tabelle mit fortlaufender ID | OK |
+| Pflichtfelder | Add, alle Felder leer, Save | Fehlermeldungen „Name/Surname/Department is required“, nichts gespeichert | OK |
+| Suchfunktion | Suche nach „laptop“ | Passende Einträge, unabhängig von Groß-/Kleinschreibung werden angezeigt | OK |
+| Gerät anlegen | Devices → Add, Name „Laptop“, Typ Computer, Mitarbeiter wählen, Save | Gerät erscheint mit Inventarnummer `CMP00001` | OK |
+| Ungültiger Typ | Im Dropdown freien Text als Typ eingeben, Save | Meldung „Select a valid type“, nichts gespeichert | OK |
+| Dropdowns aktuell | Neuen Typ/Mitarbeiter anlegen, Devices → Add | Neue Einträge sind auswählbar | OK |
+| Backup und Restore | Backup erstellen, Daten ändern/löschen, Restore, bestätigen | Bestand entspricht dem Backup | OK |
+
+Anzahl der positiv verlaufenen Tests: 8 <br>
+Anzahl der negativ verlaufenen Tests: 0
 ### Abnahmeprotokoll
 ### Fazit
 ## Verwendung von KI
