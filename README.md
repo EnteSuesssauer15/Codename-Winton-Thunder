@@ -300,6 +300,60 @@ Tester: Laura Wolf
 Anzahl der positiv verlaufenen Tests: 8 <br>
 Anzahl der negativ verlaufenen Tests: 0
 ### Abnahmeprotokoll
+Datum: 26.10.2026 
+<br>
+Teilnehmer:
+| Name | Organisation | Funktion |
+|---|---|---|
+| Nico Mößmer | TGBBZ1 | Schüler |
+| Lars Odenbreit | TGBBZ1 | Schüler |
+| Joshua Woll | TGBBZ1 | Schüler |
+| Laura Wolf | TGBBZ1 | Schüler |
+| Herr Degand | TGBBZ1 | Lehrer |
+
+#### 1. Software: KeepIt
+#### 2. Vertragsnummer: LF08-Softwareprojekt
+#### 3. Ergebnisse der Annahmeprüfung:
+
+| Funktionale Anforderungen |  |
+|---|---|
+| **Abnahmekriterium** | **Ergebnis der Prüfung** |
+| Externe Datenquelle einlesen | Ist erfüllt |
+| Dauerhafte Datenspeicherung | Ist erfüllt |
+| Suchfunktion ist vorhanden | Ist erfüllt |
+| Backup und Restore Funktion | Ist erfüllt |
+
+| Nichtfunktionale Anforderungen |  |
+|---|---|
+| **Abnahmekriterium** | **Ergebnis der Prüfung** |
+| Benutzerfreundliche Bedienung | Ist erfüllt |
+| Entwicklungs- und Benutzerdokumentation | Ist erfüllt |
+
+| Technische Anforderungen |  |
+|---|---|
+| **Abnahmekriterium** | **Ergebnis der Prüfung** |
+| Software soll über eine .exe ausführbar sein | Ist erfüllt |
+| Software soll unter Windows 11, Linux und MACOS laufen | Ist erfüllt |
+
+#### 4. Offene Punkte, welche noch zu erfüllen sind <br>
+Der Auftragnehmer hat noch folgende Aufgaben im Rahmen des Vertrages zu erfüllen: 
+
+| Aufgabe | Termin |
+|---|---|
+| Präsentation und Fachgespräch | 30.11.26 |
+
+#### 5. Offene Punkte, auf deren Erfüllung verzichtet wird <br>
+Der Auftraggeber verzichtet auf die Erfüllung folgender Aufgaben: keine
+
+#### 6. Schlussbeurteilung
+Die unter Punkt 1 genannte Software erfüllt die Anforderungen vollständig
+
+#### 7. Genehmigung / Freigabe
+
+| Auftraggeber/-in | Auftragnehmer/-in |
+|---|---|
+|<br> __________________ | <br> __________________ |
+
 ### Fazit
 ## Verwendung von KI
 
